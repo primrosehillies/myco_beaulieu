@@ -1,0 +1,283 @@
+---
+title: "archi_1"
+author: "Malo"
+date: "2024-10-30"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(multcomp)
+library(lmtest)
+library(tidyverse)
+library(ggplot2)
+library(emmeans)
+
+archi <- read.csv(file = "archi1.csv", header = T, stringsAsFactors = T, dec = ",")
+```
+
+# 1. Effet espèce
+
+## 1.1. Diamètre tige principale
+
+```{r}
+mod1 <- lm(diam_tig_princip_mm ~ species, data = archi)
+mod1_aov <- aov(diam_tig_princip_mm ~ species, data = archi)
+
+anova(mod1)
+plot(mod1)
+#kind of good, 3 outliers
+summary(mod1)
+boxplot(diam_tig_princip_mm ~ species, data = archi)
+
+
+
+tuk1 <- glht(mod1_aov, linfct = mcp(species = "Tukey"))
+# test de Tukey:
+summary(tuk1) 
+
+tuk.cld1 <- cld(tuk1, decreasing = TRUE)   
+tuk.cld1 $mcletters$Letters
+# old.par <- par(mai=c(1,1,2,1), no.readonly=TRUE)
+# plot(tuk.cld)
+
+```
+
+## 1.2. Diamètre tige latérale
+
+```{r}
+###########
+mod2 <- lm(diam_tig_lat_mm ~ species, data = archi)
+mod2_aov <- aov(diam_tig_lat_mm ~ species, data = archi)
+
+anova(mod2)
+plot(mod2)
+
+summary(mod2)
+boxplot(diam_tig_lat_mm ~ species, data = archi)
+
+
+
+tuk2 <- glht(mod2_aov, linfct = mcp(species = "Tukey"))
+# test de Tukey:
+summary(tuk2) 
+
+tuk.cld2 <- cld(tuk2, decreasing = TRUE)   
+tuk.cld2 $mcletters$Letters
+
+
+
+```
+
+## 1.3. Diamètre racine pivot
+
+```{r}
+###########
+mod3 <- lm(diam_rac_pivot_mm ~ species, data = archi)
+mod3_aov <- aov(diam_rac_pivot_mm ~ species, data = archi)
+
+anova(mod3)
+plot(mod3)
+
+summary(mod3)
+boxplot(diam_rac_pivot_mm ~ species, data = archi)
+
+
+
+tuk3 <- glht(mod3_aov, linfct = mcp(species = "Tukey"))
+# test de Tukey:
+summary(tuk3) 
+
+tuk.cld3 <- cld(tuk3, decreasing = TRUE)   
+tuk.cld3 $mcletters$Letters
+
+
+
+```
+
+## 1.4. Conicité
+
+```{r}
+###########
+mod4 <- lm(conicite_mm ~ species, data = archi)
+mod4_aov <- aov(conicite_mm ~ species, data = archi)
+
+anova(mod4)
+plot(mod4)
+
+summary(mod4)
+boxplot(conicite_mm ~ species, data = archi)
+
+
+
+tuk4 <- glht(mod4_aov, linfct = mcp(species = "Tukey"))
+# test de Tukey:
+summary(tuk4) 
+
+tuk.cld4 <- cld(tuk4, decreasing = TRUE)   
+tuk.cld4 $mcletters$Letters
+
+
+
+```
+
+## 1.5. Profondeur du pivot
+
+```{r}
+###########
+mod5 <- lm(prof_pivot_mm ~ species, data = archi)
+mod5_aov <- aov(prof_pivot_mm ~ species, data = archi)
+
+anova(mod5)
+plot(mod5)
+
+summary(mod5)
+boxplot(prof_pivot_mm ~ species, data = archi)
+
+
+
+tuk5 <- glht(mod5_aov, linfct = mcp(species = "Tukey"))
+# test de Tukey:
+summary(tuk5) 
+
+tuk.cld5 <- cld(tuk5, decreasing = TRUE)   
+tuk.cld5 $mcletters$Letters
+
+
+```
+
+# 2.Effet site
+
+## 2.1. Diamètre tige principale
+
+```{r}
+mod6 <- lm(diam_tig_princip_mm ~ site_type, data = archi)
+mod6_aov <- aov(diam_tig_princip_mm ~ site_type, data = archi)
+
+anova(mod6)
+plot(mod6)
+
+summary(mod6)
+boxplot(diam_tig_princip_mm ~ site_type, data = archi)
+
+
+
+tuk6 <- glht(mod6_aov, linfct = mcp(site_type = "Tukey"))
+# test de Tukey:
+summary(tuk6) 
+
+tuk.cld6 <- cld(tuk6, decreasing = TRUE)   
+tuk.cld6 $mcletters$Letters
+
+
+
+```
+
+## 2.2. Conicité
+
+```{r}
+#######
+mod7 <- lm(conicite_mm ~ site_type, data = archi)
+mod7_aov <- aov(conicite_mm ~ site_type, data = archi)
+
+anova(mod7)
+plot(mod7)
+
+summary(mod7)
+boxplot(conicite_mm ~ site_type, data = archi)
+
+
+
+tuk7 <- glht(mod7_aov, linfct = mcp(site_type = "Tukey"))
+# test de Tukey:
+summary(tuk7) 
+
+tuk.cld7 <- cld(tuk7, decreasing = TRUE)   
+tuk.cld7 $mcletters$Letters
+
+
+```
+
+## 2.3. Profondeur du pivot
+
+```{r}
+#######
+mod8 <- lm(prof_pivot_mm ~ site_type, data = archi)
+mod8_aov <- aov(prof_pivot_mm ~ site_type, data = archi)
+
+anova(mod8)
+plot(mod8)
+
+summary(mod8)
+boxplot(prof_pivot_mm ~ site_type, data = archi)
+
+
+
+tuk8 <- glht(mod8_aov, linfct = mcp(site_type = "Tukey"))
+# test de Tukey:
+summary(tuk8) 
+
+tuk.cld8 <- cld(tuk8, decreasing = TRUE)   
+tuk.cld8 $mcletters$Letters
+```
+
+Pas mal de variabilité dans les mesures de profondeur de pivot : peut-être revoir la manière de la mesurer ? Ou bien peut-être normal ?
+
+
+
+
+
+# 3. Interaction espèce / site
+## 3.1. Profondeur de pivot
+```{r}
+#######
+mod9 <- lm(prof_pivot_mm ~ site_type * species, data = archi)
+mod9_aov <- aov(prof_pivot_mm ~ site_type * species, data = archi)
+
+anova(mod9)
+plot(mod9)
+
+summary(mod9)
+boxplot(prof_pivot_mm ~ site_type * species, data = archi)
+
+hsd9 <-TukeyHSD(mod9_aov) # fonction pour faire un test post hoc de Tukey
+hsd9
+plot(hsd9)
+```
+## 3.2. Conicité
+```{r}
+#######
+mod9 <- lm(log(conicite_mm) ~ site_type * species, data = archi)
+mod9_aov <- aov(log(conicite_mm) ~ site_type * species, data = archi)
+
+anova(mod9)
+plot(mod9)
+
+shapiro.test(mod9$residuals)
+
+summary(mod9)
+boxplot(log(conicite_mm) ~ site_type * species, data = archi)
+
+hsd9 <-TukeyHSD(mod9_aov) # fonction pour faire un test post hoc de Tukey
+hsd9
+plot(hsd9)
+```
+
+## 3.3. Profondeur de pivot
+```{r}
+#######
+mod9 <- lm(log(prof_pivot_mm) ~ site_type * species, data = archi)
+mod9_aov <- aov(log(prof_pivot_mm) ~ site_type * species, data = archi)
+
+anova(mod9)
+plot(mod9)
+
+shapiro.test(mod9$residuals)
+
+summary(mod9)
+boxplot(log(prof_pivot_mm) ~ site_type * species, data = archi)
+
+hsd9 <-TukeyHSD(mod9_aov) # fonction pour faire un test post hoc de Tukey
+hsd9
+plot(hsd9)
+```
+

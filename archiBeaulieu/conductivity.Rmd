@@ -1,0 +1,99 @@
+---
+title: "Conductivity"
+author: "Malo"
+date: "2024-12-16"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+```
+
+
+
+# Getting proper surface by getting rid of big empty areas
+
+
+```{r}
+vessel <- read.csv(file = "vessel_2.csv", header = T, stringsAsFactors = T)
+vessel$file <- vessel$Label
+
+anat <- read.csv(file = "anat_1.csv", header = T, stringsAsFactors = T)
+
+
+vessel_mean <- vessel %>%
+  group_by(file) %>%
+  summarize(mean = mean(Area))
+
+vessel_extreme <- vessel %>%
+  filter(Area > 1200)
+
+
+vessel_extreme_sum <- vessel_extreme %>%
+  group_by(file) %>%
+  summarize(sum = sum(Area))
+
+vessel_extreme_sum$file <- as.character(vessel_extreme_sum$file)
+vessel_extreme_sum <- vessel_extreme_sum %>%
+  full_join(anat, by = "file")
+
+vessel_extreme_sum$sum[is.na(vessel_extreme_sum$sum)] <- 0
+vessel_extreme_sum$image_surface_rectified_µm2 <- vessel_extreme_sum$image_surface_µm2 - vessel_extreme_sum$sum
+
+vessel_extreme_sum <- vessel_extreme_sum %>%
+  select(file, image_surface_rectified_µm2)
+
+anat <- anat %>%
+  left_join(vessel_extreme_sum, by = "file")
+```
+
+# Calculating mean, standard deviation, sum, count, dh
+
+```{r}
+#Getting rid of big vessels
+vessel_1200 <- vessel %>%
+  select(file, Area, Perim.) %>%
+  filter(Area <= 1200) %>%
+  mutate(diameter = 2*sqrt(Area/pi),
+         d4 = diameter^4)
+
+
+vessel_summary <- vessel_1200 %>%
+  group_by(file) %>%
+  summarize(mean_vessel_size_µm2 = mean(Area),
+            std_dev_vessel_size_µm2 = sd(Area),
+            sum_vessel_area_µm2 = sum(Area),
+            count_vessel = n(),
+            dh = (sum(d4)/n())^0.25
+            )
+```
+
+# Calculating vessel density and Kth
+
+```{r}
+vessel_summary <- anat %>%
+  select(file, image_surface_rectified_µm2) %>%
+  left_join(vessel_summary, by = "file")
+
+vessel_summary$image_surface_rectified_mm2 <- vessel_summary$image_surface_rectified_µm2 / 1000000
+
+vessel_summary$vessel_density_per_mm2 <- vessel_summary$count_vessel / vessel_summary$image_surface_rectified_mm2
+vessel_summary$vessel_density_per_m2 <- vessel_summary$vessel_density_per_mm2 * 10^6
+vessel_summary$dh_m <- vessel_summary$dh * 10^-6
+
+
+#Getting Kth
+
+water_density <- 998.2
+water_viscosity <- 1.002*10^-9
+hagen_poiseuille <- (pi * water_density) / (128 * water_viscosity)
+
+vessel_summary$Kth <- hagen_poiseuille * vessel_summary$vessel_density_per_m2 * vessel_summary$dh_m^4
+
+
+
+
+plot(vessel_summary$vessel_density_per_mm2, vessel_summary$Kth)
+
+summary(vessel_summary)
+```
