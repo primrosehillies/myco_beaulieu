@@ -1,9 +1,9 @@
 library(jpeg)
 
-# List all JPG files in a directory
+# list JPG files in a directory
 square_files <- list.files(path = "square", pattern = "\\.jpg$", full.names = TRUE)
 
-# Function to get dimensions of an image
+#function to get dimensions of an image
 get_image_dimensions <- function(image_path) {
   img <- readJPEG(image_path, native = TRUE)  # Load the image
   list(
@@ -13,10 +13,10 @@ get_image_dimensions <- function(image_path) {
   )
 }
 
-# Apply the function to all images
+#function to all images
 image_dimensions <- lapply(square_files, get_image_dimensions)
 
-# Convert the list to a data frame
+#get data frame
 image_dimensions_df <- do.call(rbind.data.frame, image_dimensions)
 
 

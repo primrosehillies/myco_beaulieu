@@ -1,0 +1,385 @@
+---
+title: "Anatomy and architecture summary"
+author: "Malo"
+date: "2025-01-17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(jpeg)
+library(purrr)
+library(psych)
+```
+
+Created from anat_archi_summary_v1.Rmd
+
+
+# Creating datasets
+
+<details>
+
+<summary>Details</summary>
+
+## Anatomy
+
+### Image dimensions
+
+```{r}
+#####Getting image dimensions####
+# list JPG files in a directory
+square_files <- list.files(path = "square", pattern = "\\.jpg$", full.names = TRUE)
+
+
+get_image_dimensions <- function(image_path) {
+  img <- readJPEG(image_path, native = TRUE)  # Load the image
+  list(
+    file = basename(image_path),              # File name
+    width_px = attr(img, "dim")[2],              # Width
+    height_px = attr(img, "dim")[1]              # Height
+  )
+}
+
+#function to all images
+image_dimensions <- lapply(square_files, get_image_dimensions)
+
+#get data frame
+image_dimensions_df <- do.call(rbind.data.frame, image_dimensions)
+
+#####Making variables in good format####
+
+image_dimensions_df$id_complete <- gsub("_square\\.jpg$", "", image_dimensions_df$file)
+
+image_dimensions_df$id_amap <- substr(image_dimensions_df$id_complete, 1, 4)
+
+
+image_dimensions_df$id_complete2 <- ifelse(
+  nchar(image_dimensions_df$id_complete) == 28,
+  paste0(substr(image_dimensions_df$id_complete, 1, 12), "0", substr(image_dimensions_df$id_complete, 13, nchar(image_dimensions_df$id_complete))),
+  image_dimensions_df$id_complete
+)
+image_dimensions_df$id_complete3 <- ifelse(
+  nchar(image_dimensions_df$id_complete2) == 30,
+  paste0(substr(image_dimensions_df$id_complete2, 1, 12), "0", substr(image_dimensions_df$id_complete2, 13, nchar(image_dimensions_df$id_complete2))),
+  image_dimensions_df$id_complete2
+)
+
+
+image_dimensions_df$id_complete4 <- gsub("Tige", "T", image_dimensions_df$id_complete3)
+image_dimensions_df$id_complete5 <- gsub("Racine", "R", image_dimensions_df$id_complete4)
+
+
+image_dimensions_df$id_complete6 <- gsub("-", "_", image_dimensions_df$id_complete5)
+
+split_names <- strsplit(image_dimensions_df$id_complete6, "_")
+
+image_dimensions_df$site <- sapply(split_names, function(x) x[2])      # Second element (T1)
+image_dimensions_df$species <- sapply(split_names, function(x) x[3])  # Third element (Ho2)
+image_dimensions_df$id_lucas <- sapply(split_names, function(x) x[4]) # Fourth element (03)
+image_dimensions_df$organ <- sapply(split_names, function(x) x[5])    # Fifth element (T)
+image_dimensions_df$zoom <- sapply(split_names, function(x) x[6])     # Sixth element (X200)
+image_dimensions_df$coupe_µm <- sapply(split_names, function(x) x[7]) # Seventh element (09µm)
+
+
+image_dimensions_df$site_type <- substr(image_dimensions_df$site, 1, 1)  # First character (T)
+image_dimensions_df$site_replicate <- substr(image_dimensions_df$site, 2, nchar(image_dimensions_df$site))  # Remaining characters (1)
+
+
+image_dimensions_df$micro <- ifelse(grepl("[a-z]", image_dimensions_df$site_type), 1, 0)
+
+image_dimensions_df$site_type <- toupper(image_dimensions_df$site_type)
+
+
+image_dimensions_df$species_name <- substr(image_dimensions_df$species, 1, 2)  # First two characters (e.g., "Ho")
+image_dimensions_df$species_site_replicate <- substr(image_dimensions_df$species, 3, nchar(image_dimensions_df$species))  # Remaining characters (e.g., "1")
+
+
+image_dimensions_df$width_µm <- image_dimensions_df$width_px / 1.9111
+image_dimensions_df$height_µm <- image_dimensions_df$height_px / 1.9111
+
+image_dimensions_df$image_surface_µm2 <- image_dimensions_df$width_µm * image_dimensions_df$height_µm
+
+#####Final dataset####
+anat <- data.frame(
+  file = image_dimensions_df$file,
+  id_complete = image_dimensions_df$id_complete6,
+  image_surface_µm2 = image_dimensions_df$image_surface_µm2,
+  id_amap = image_dimensions_df$id_amap,
+  number = image_dimensions_df$id_lucas,
+  site = image_dimensions_df$site,
+  site_type = image_dimensions_df$site_type,
+  site_replicate = image_dimensions_df$site_replicate,
+  species_site_replicate = image_dimensions_df$species,
+  species = image_dimensions_df$species_name,
+  species_replicate = image_dimensions_df$species_site_replicate,
+  micro = image_dimensions_df$micro,
+  organ = image_dimensions_df$organ,
+  
+  
+  stringsAsFactors = FALSE
+)
+
+
+```
+
+### Calculating vessel conductivity, clusters, size, diameter...
+
+```{r}
+vessel <- read.csv(file = "vessel_4.csv", header = T, stringsAsFactors = T)
+vessel$file <- vessel$Label
+anat <- read.csv(file = "anat_3.csv", header = T, stringsAsFactors = T)
+anat$id_amap <- as.character(anat$id_amap)
+#Files will change if data is updated
+
+#####Getting proper surface by getting rid of big empty areas####
+
+vessel$id_amap <- as.factor(substr(vessel$file, 1, 4))
+
+#####Clusters####
+# clustering function
+cluster_vessels <- function(data) {
+#Compute radii
+  data$Radius <- sqrt(data$Area / pi)
+  data$Radius_enhanced <- data$Radius + 4.5
+  
+#distance between every vessel
+distances <- as.matrix(dist(data[, c("X", "Y")], method = "euclidean"))
+radius_matrix <- outer(data$Radius_enhanced, data$Radius_enhanced, "+")
+perimeter_distances <- distances - radius_matrix
+  
+data$Cluster <- 0
+cluster_id <- 1
+  
+#Clustering
+  repeat {
+    changes <- FALSE
+    
+    for (i in seq_len(nrow(perimeter_distances))) {
+      if (data$Cluster[i] == 0) {
+        data$Cluster[i] <- cluster_id
+        nearby <- which(perimeter_distances[i, ] <= 0)
+        data$Cluster[nearby] <- cluster_id
+        changes <- TRUE
+        cluster_id <- cluster_id + 1
+      }
+    }
+    
+    for (i in seq_len(nrow(perimeter_distances) - 1)) {
+      for (j in seq(i + 1, nrow(perimeter_distances))) {
+        if (perimeter_distances[i, j] <= 0) {
+          if (data$Cluster[i] != data$Cluster[j]) {
+            old_cluster <- data$Cluster[j]
+            new_cluster <- data$Cluster[i]
+            data$Cluster[data$Cluster == old_cluster] <- new_cluster
+            changes <- TRUE
+          }
+        }
+      }
+    }
+    
+    if (!changes) break
+  }
+  
+  return(data)
+}
+
+#Group by `id_amap` and apply clustering
+vessel <- vessel %>%
+  group_by(id_amap) %>%
+  group_split() %>%
+  map_dfr(cluster_vessels)
+
+
+
+#####Getting rid of extremes####
+vessel_mean <- vessel %>%
+  group_by(id_amap) %>%
+  summarize(mean = mean(Area))
+
+vessel_extreme <- vessel %>%
+  filter(Area > 1200)
+
+
+vessel_extreme_sum <- vessel_extreme %>%
+  group_by(id_amap) %>%
+  summarize(sum = sum(Area))
+
+vessel_extreme_sum$id_amap <- as.character(vessel_extreme_sum$id_amap)
+anat$id_amap <- as.character(anat$id_amap)
+vessel_extreme_sum <- vessel_extreme_sum %>%
+  full_join(anat, by = "id_amap")
+
+vessel_extreme_sum$sum[is.na(vessel_extreme_sum$sum)] <- 0
+vessel_extreme_sum$image_surface_rectified_µm2 <- vessel_extreme_sum$image_surface_µm2 - vessel_extreme_sum$sum
+
+vessel_extreme_sum <- vessel_extreme_sum %>%
+  select(id_amap, image_surface_rectified_µm2)
+
+anat <- anat %>%
+  left_join(vessel_extreme_sum, by = "id_amap")
+
+#####Calculating mean, standard deviation, sum, count, dh####
+#Getting rid of big vessels
+vessel_1200 <- vessel %>%
+  select(id_amap, Area, Perim., Cluster) %>%
+  filter(Area <= 1200) %>%
+  mutate(diameter = 2*sqrt(Area/pi),
+         d4 = diameter^4)
+
+vessel_summary_pre <- vessel_1200 %>%
+  group_by(id_amap) %>%
+  distinct(Cluster) %>%
+  summarize(count_cluster = n())
+
+  
+vessel_summary_pre2 <- vessel_1200 %>%
+  group_by(id_amap) %>%
+  summarize(mean_vessel_size_µm2 = mean(Area),
+            std_dev_vessel_size_µm2 = sd(Area),
+            mean_vessel_perim_µm = mean(Perim.),
+            std_dev_perim_µm = sd(Perim.),
+            sum_vessel_area_µm2 = sum(Area),
+            dh = (sum(d4)/n())^0.25,
+            count_vessel = n()
+            ) 
+
+vessel_summary <- vessel_summary_pre2 %>%
+  left_join(vessel_summary_pre, by = "id_amap") %>%
+  mutate(vessel_grouping = count_vessel / count_cluster)
+
+#####Calculating vessel density and Kth####
+vessel_summary <- anat %>%
+  select(id_amap, image_surface_rectified_µm2) %>%
+  left_join(vessel_summary, by = "id_amap")
+
+vessel_summary$image_surface_rectified_mm2 <- vessel_summary$image_surface_rectified_µm2 / 1000000
+
+vessel_summary$vessel_density_per_mm2 <- vessel_summary$count_vessel / vessel_summary$image_surface_rectified_mm2
+vessel_summary$vessel_density_per_m2 <- vessel_summary$vessel_density_per_mm2 * 10^6
+vessel_summary$dh_m <- vessel_summary$dh * 10^-6
+vessel_summary$vessel_area <- vessel_summary$sum_vessel_area_µm2 / vessel_summary$image_surface_rectified_µm2
+
+
+#Getting Kth
+
+water_density <- 998.2
+water_viscosity <- 1.002*10^-9
+hagen_poiseuille <- (pi * water_density) / (128 * water_viscosity)
+
+vessel_summary$Kth <- hagen_poiseuille * vessel_summary$vessel_density_per_m2 * vessel_summary$dh_m^4
+
+
+
+
+plot(vessel_summary$vessel_density_per_mm2, vessel_summary$Kth)
+
+summary(vessel_summary)
+#####
+write.csv(vessel_summary, file = "vessel_summary_4.csv")
+write.csv(anat, file = "anat_6.csv")
+```
+
+### Binding stem and root data for every individual
+
+```{r}
+anat <- read.csv(file = "anat_6.csv", header = T, stringsAsFactors = T)
+
+#####Preparing the data####
+anat <- anat %>%
+  select(-X.1, -X)
+
+anat$id_amap <- as.character(anat$id_amap)
+vessel_summary$id_amap <- substr(image_dimensions_df$id_complete, 1, 4)
+
+anat <- anat %>%
+  left_join(vessel_summary, by = "id_amap")
+anat$number <- as.factor(anat$number)
+anat$count_vessel <- as.numeric(anat$count_vessel)
+anat$id_amap <- as.numeric(anat$id_amap)
+#####Creating stem and root datasets####
+numerical_cols <- c("image_surface_µm2", "image_surface_rectified_µm2.x", 
+                    "mean_vessel_size_µm2", "std_dev_vessel_size_µm2", "mean_vessel_perim_µm", 
+                    "std_dev_perim_µm", "sum_vessel_area_µm2", "count_vessel", "count_cluster", "vessel_grouping", "dh", 
+                    "image_surface_rectified_mm2", "vessel_density_per_mm2", "vessel_density_per_m2", 
+                    "dh_m", "vessel_area", "Kth")
+
+anat_Racine <- anat %>% 
+  filter(organ == "R") %>%
+  dplyr::select(all_of(numerical_cols), number) %>%
+  rename_with(~ paste0(., "_Racine"), all_of(numerical_cols))
+
+anat_Tige <- anat %>% 
+  filter(organ == "T") %>%
+  dplyr::select(all_of(numerical_cols), number) %>%
+  rename_with(~ paste0(., "_Tige"), all_of(numerical_cols))
+#####Binding root and stem datasets and selecting variables####
+anat_Tige_Racine <- anat_Tige %>%
+  full_join(anat_Racine, by = "number")
+#keeping metadata aside
+anat_metadata <- anat %>%
+  dplyr::select(number, site, site_type, site_replicate, species_site_replicate, species, species_replicate, micro) %>%
+  distinct(number, site, site_type, site_replicate, species_site_replicate, species, species_replicate, micro)
+
+
+anat_combined <- anat_metadata %>%
+  left_join(anat_Tige_Racine, by = "number")
+
+one_ninety <- read.csv("1_90.csv", header = T, stringsAsFactors = T)
+anat_combined$number <- as.character(anat_combined$number)
+one_ninety$number <- as.character(one_ninety$number)
+
+anat_combined <- anat_combined %>%
+  full_join(one_ninety, by = "number")
+anat_combined$number <- as.integer(anat_combined$number)
+#####
+write.csv(anat_combined, "anat_combined_3.csv")
+```
+
+## Architecture
+
+### Binding anatomy dataset with architecture
+
+```{r}
+archi <- read.csv("archi_2.csv", header =T, stringsAsFactors = T)
+anat_combined <- read.csv("anat_combined_3.csv", header = T, stringsAsFactors = T)
+metadata <- read.csv("metadata.csv", header = T, stringsAsFactors = T)
+
+#####Joining datasets####
+metadata$number <- as.character(metadata$number)
+archi$number <- archi$num
+anarchi <- archi %>%
+  dplyr::select(-X, -code, -species, -site_type, -site_replicate, -site, -micro) %>%
+  full_join(anat_combined, by = "number") %>%
+  dplyr::select(-X)
+
+anarchi$number <- as.character(anarchi$number)
+anarchi <- anarchi %>%
+  select(-site,-site_type, -site_replicate, -species_site_replicate, -species, -species_replicate, -micro) %>%
+  left_join(metadata, by = "number")
+#####
+write.csv(anarchi, "anarchi_2.csv")
+```
+
+</details>
+
+# Data exploration
+
+<details>
+
+<summary>Details</summary>
+
+## Anatomy
+
+```{r}
+
+```
+
+## Architecture
+
+```{r}
+
+```
+
+</details>
+
