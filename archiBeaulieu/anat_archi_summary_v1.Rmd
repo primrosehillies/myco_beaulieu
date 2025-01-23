@@ -2,28 +2,34 @@
 title: "Anatomy and architecture summary"
 author: "Malo"
 date: "2025-01-17"
-output: html_document
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    toc_depth: 5
+    theme: cosmo
 ---
 
 ```{r setup, include=FALSE}
-library(tidyverse)
 library(ggplot2)
 library(jpeg)
 library(purrr)
 library(psych)
+library(lme4)
+library(multcomp)
+library(multcompView)
+
+
+library(tidyverse)
+
 ```
 
 Created from anat_archi_summary_v1.Rmd
 
 
 # Creating datasets
-
-<details>
-
-<summary>Details</summary>
-
 ## Anatomy
-
 ### Image dimensions
 
 ```{r}
@@ -214,7 +220,7 @@ vessel_extreme_sum$sum[is.na(vessel_extreme_sum$sum)] <- 0
 vessel_extreme_sum$image_surface_rectified_µm2 <- vessel_extreme_sum$image_surface_µm2 - vessel_extreme_sum$sum
 
 vessel_extreme_sum <- vessel_extreme_sum %>%
-  select(id_amap, image_surface_rectified_µm2)
+  dplyr::select(id_amap, image_surface_rectified_µm2)
 
 anat <- anat %>%
   left_join(vessel_extreme_sum, by = "id_amap")
@@ -357,29 +363,318 @@ anarchi$number <- as.character(anarchi$number)
 anarchi <- anarchi %>%
   select(-site,-site_type, -site_replicate, -species_site_replicate, -species, -species_replicate, -micro) %>%
   left_join(metadata, by = "number")
+
+anarchi <- anarchi %>%
+  select(-num)
+anarchi <- anarchi %>%
+  select(number, site, site_type, site_replicate, species_site_replicate, species, species_replicate, micro, everything())
 #####
-write.csv(anarchi, "anarchi_2.csv")
+write.csv(anarchi, "anarchi_3.csv")
+```
+### Creating dataset for each species
+```{r}
+anarchi <- read.csv(file = "anarchi_3.csv", header = T, stringsAsFactors = T)
+anarchi_Ho <- anarchi %>%
+  filter(species == "Ho")
+anarchi_Fe <- anarchi %>%
+  filter(species == "Fe")
+anarchi_Ft <- anarchi %>%
+  filter(species == "Ft")
 ```
 
-</details>
 
 # Data exploration
-
-<details>
-
-<summary>Details</summary>
-
-## Anatomy
-
+## Correlations overview
+### Fumana ericoides
 ```{r}
+pairs.panels(anarchi_Fe[,c("Kth_Tige", "vessel_density_per_mm2_Tige", "dh_Tige", "site_type",
+                        "diam_tig_princip_mm", "diam_rac_pivot_mm",
+                        "diam_rac_lat_mm", "diam_tig_lat_mm",
+                        "empreinte_photo_mm", "y_photo_mm")],
+             method = "spearman", # correlation method
+             hist.col = "lightgreen",
+             density = TRUE,  # show density plots
+             ellipses = FALSE # show correlation ellipses
+)
+```
 
+### Fumana thymifolia
+```{r}
+pairs.panels(anarchi_Ft[,c("Kth_Tige", "vessel_density_per_mm2_Tige", "dh_Tige", "site_type",
+                        "diam_tig_princip_mm", "diam_rac_pivot_mm",
+                        "diam_rac_lat_mm", "diam_tig_lat_mm",
+                        "empreinte_photo_mm", "y_photo_mm")],
+             method = "spearman", # correlation method
+             hist.col = "#00AFBB",
+             density = TRUE,  # show density plots
+             ellipses = FALSE # show correlation ellipses
+)
+```
+
+### Helianthemum oelandicum
+```{r}
+pairs.panels(anarchi_Ho[,c("Kth_Tige", "vessel_density_per_mm2_Tige", "dh_Tige",
+                        "diam_tig_princip_mm", "diam_rac_pivot_mm",
+                        "diam_rac_lat_mm", "diam_tig_lat_mm",
+                        "empreinte_photo_mm", "y_photo_mm")],
+             method = "spearman", # correlation method
+             hist.col = "orange",
+             density = TRUE,  # show density plots
+             ellipses = FALSE # show correlation ellipses
+)
 ```
 
 ## Architecture
+### Fumana ericoides
+#### Site models
+##### Diamètre tige principale
 
 ```{r}
+mod_fe_1 <- lm(diam_tig_princip_mm ~ site_type, data = anarchi_Fe)
+mod_fe_1_aov <- aov(diam_tig_princip_mm ~ site_type, data = anarchi_Fe)
 
+anova(mod_fe_1)
+plot(mod_fe_1)
+
+summary(mod_fe_1)
+boxplot(diam_tig_princip_mm ~ site_type, data = anarchi_Fe)
+
+
+tuk_fe_1 <- glht(mod_fe_1_aov, linfct = mcp(site_type = "Tukey"))
+# test de Tukey:
+summary(tuk_fe_1) 
+
+tuk.cld_fe_1 <- cld(tuk_fe_1, decreasing = TRUE)   
+tuk.cld_fe_1 $mcletters$Letters
 ```
 
-</details>
+##### Conicité
 
+```{r}
+#######
+mod_fe_2 <- lm(conicite_mm ~ site_type, data = anarchi_Fe)
+mod_fe_2_aov <- aov(conicite_mm ~ site_type, data = anarchi_Fe)
+
+anova(mod_fe_2)
+plot(mod_fe_2)
+```
+
+##### Profondeur du pivot
+
+```{r}
+#######
+mod_fe_3 <- lm(prof_pivot_mm ~ site_type, data = anarchi_Fe)
+mod_fe_3_aov <- aov(prof_pivot_mm ~ site_type, data = anarchi_Fe)
+
+anova(mod_fe_3)
+plot(mod_fe_3)
+
+summary(mod_fe_3)
+boxplot(prof_pivot_mm ~ site_type, data = anarchi_Fe)
+
+
+tuk_fe_3 <- glht(mod_fe_3_aov, linfct = mcp(site_type = "Tukey"))
+# test de Tukey:
+summary(tuk_fe_1) 
+
+tuk.cld_fe_3 <- cld(tuk_fe_1, decreasing = TRUE)   
+tuk.cld_fe_3 $mcletters$Letters
+```
+
+
+
+### Fumana thymifolia
+#### Site models
+##### Diamètre tige principale
+
+```{r}
+mod_ft_1 <- lm(diam_tig_princip_mm ~ site_type, data = anarchi_Ft)
+mod_ft_1_aov <- aov(diam_tig_princip_mm ~ site_type, data = anarchi_Ft)
+
+anova(mod_ft_1)
+plot(mod_ft_1)
+
+summary(mod_ft_1)
+boxplot(diam_tig_princip_mm ~ site_type, data = anarchi_Ft)
+
+
+tuk_ft_1 <- glht(mod_ft_1_aov, linfct = mcp(site_type = "Tukey"))
+# test de Tukey:
+summary(tuk_fe_1) 
+
+tuk.cld_ft_1 <- cld(tuk_ft_1, decreasing = TRUE)   
+tuk.cld_ft_1 $mcletters$Letters
+```
+
+##### Conicité
+
+```{r}
+mod_ft_2 <- lm(conicite_mm ~ site_type, data = anarchi_Ft)
+mod_ft_2_aov <- aov(conicite_mm ~ site_type, data = anarchi_Ft)
+
+anova(mod_ft_2)
+plot(mod_ft_2)
+
+summary(mod_ft_2)
+boxplot(conicite_mm ~ site_type, data = anarchi_Ft)
+
+
+tuk_ft_2 <- glht(mod_ft_2_aov, linfct = mcp(site_type = "Tukey"))
+# test de Tukey:
+summary(tuk_ft_2) 
+
+tuk.cld_ft_2 <- cld(tuk_ft_2, decreasing = TRUE)   
+tuk.cld_ft_2 $mcletters$Letters
+```
+
+##### Profondeur du pivot
+
+```{r}
+mod_ft_3 <- lm(prof_pivot_mm ~ site_type, data = anarchi_Ft)
+mod_ft_3_aov <- aov(prof_pivot_mm ~ site_type, data = anarchi_Ft)
+
+anova(mod_ft_3)
+plot(mod_ft_3)
+
+summary(mod_ft_3)
+boxplot(prof_pivot_mm ~ site_type, data = anarchi_Ft)
+
+
+tuk_ft_3 <- glht(mod_ft_3_aov, linfct = mcp(site_type = "Tukey"))
+# test de Tukey:
+summary(tuk_fe_1) 
+
+tuk.cld_ft_3 <- cld(tuk_ft_3, decreasing = TRUE)   
+tuk.cld_ft_3 $mcletters$Letters
+```
+
+### Helianthemum oelandicum
+#### Site models
+No site models: Helianthemum was only sampled in T
+
+
+## Anatomy
+### Fumana ericoides
+#### Site models
+##### Vessel density - Stems
+```{r}
+mod_fe_an_1 <- lm(vessel_density_per_mm2_Tige ~ site_type, data = anarchi_Fe)
+mod_fe_an_1_aov <- aov(vessel_density_per_mm2_Tige ~ site_type, data = anarchi_Fe)
+
+anova(mod_fe_an_1)
+plot(mod_fe_an_1)
+
+summary(mod_fe_an_1)
+boxplot(vessel_density_per_mm2_Tige ~ site_type, data = anarchi_Fe)
+
+
+tuk_fe_an_1 <- glht(mod_fe_an_1_aov, linfct = mcp(site_type = "Tukey"))
+# test de Tukey:
+summary(mod_fe_an_1) 
+
+tuk.cld_fe_an_1 <- cld(tuk_fe_an_1, decreasing = TRUE)   
+tuk.cld_fe_an_1 $mcletters$Letters
+```
+##### Mean vessel size - Stems
+```{r}
+mod_fe_an_2 <- lm(mean_vessel_size_µm2_Tige ~ site_type, data = anarchi_Fe)
+mod_fe_an_2_aov <- aov(mean_vessel_size_µm2_Tige ~ site_type, data = anarchi_Fe)
+
+anova(mod_fe_an_2)
+plot(mod_fe_an_2)
+
+summary(mod_fe_an_2)
+boxplot(mean_vessel_size_µm2_Tige ~ site_type, data = anarchi_Fe)
+
+
+tuk_fe_an_2 <- glht(mod_fe_an_2_aov, linfct = mcp(site_type = "Tukey"))
+# test de Tukey:
+summary(mod_fe_an_2) 
+
+tuk.cld_fe_an_2 <- cld(tuk_fe_an_2, decreasing = TRUE)   
+tuk.cld_fe_an_2 $mcletters$Letters
+```
+##### Theoretical conductivity - Stems
+```{r}
+mod_fe_an_3 <- lm(Kth_Tige ~ site_type, data = anarchi_Fe)
+mod_fe_an_3_aov <- aov(Kth_Tige ~ site_type, data = anarchi_Fe)
+
+anova(mod_fe_an_3)
+plot(mod_fe_an_3)
+
+summary(mod_fe_an_3)
+boxplot(Kth_Tige ~ site_type, data = anarchi_Fe)
+
+
+tuk_fe_an_3 <- glht(mod_fe_an_3_aov, linfct = mcp(site_type = "Tukey"))
+# test de Tukey:
+summary(mod_fe_an_3) 
+
+tuk.cld_fe_an_3 <- cld(tuk_fe_an_3, decreasing = TRUE)   
+tuk.cld_fe_an_3 $mcletters$Letters
+```
+
+### Fumana thymifolia
+#### Site models
+##### Vessel density - Stems
+```{r}
+mod_ft_an_1 <- lm(vessel_density_per_mm2_Tige ~ site_type, data = anarchi_Ft)
+mod_ft_an_1_aov <- aov(vessel_density_per_mm2_Tige ~ site_type, data = anarchi_Ft)
+
+anova(mod_ft_an_1)
+plot(mod_ft_an_1)
+
+summary(mod_ft_an_1)
+boxplot(vessel_density_per_mm2_Tige ~ site_type, data = anarchi_Ft)
+
+
+tuk_ft_an_1 <- glht(mod_ft_an_1_aov, linfct = mcp(site_type = "Tukey"))
+# test de Tukey:
+summary(mod_ft_an_1) 
+
+tuk.cld_ft_an_1 <- cld(tuk_ft_an_1, decreasing = TRUE)   
+tuk.cld_ft_an_1 $mcletters$Letters
+```
+##### Mean vessel size - Stems
+```{r}
+mod_ft_an_2 <- lm(mean_vessel_size_µm2_Tige ~ site_type, data = anarchi_Ft)
+mod_ft_an_2_aov <- aov(mean_vessel_size_µm2_Tige ~ site_type, data = anarchi_Ft)
+
+anova(mod_ft_an_2)
+plot(mod_ft_an_2)
+
+summary(mod_ft_an_2)
+boxplot(mean_vessel_size_µm2_Tige ~ site_type, data = anarchi_Ft)
+
+
+tuk_ft_an_2 <- glht(mod_ft_an_2_aov, linfct = mcp(site_type = "Tukey"))
+# test de Tukey:
+summary(mod_ft_an_2) 
+
+tuk.cld_ft_an_2 <- cld(tuk_ft_an_2, decreasing = TRUE)   
+tuk.cld_ft_an_2 $mcletters$Letters
+```
+##### Theoretical conductivity - Stems
+```{r}
+mod_ft_an_3 <- lm(Kth_Tige ~ site_type, data = anarchi_Ft)
+mod_ft_an_3_aov <- aov(Kth_Tige ~ site_type, data = anarchi_Ft)
+
+anova(mod_ft_an_3)
+plot(mod_ft_an_3)
+
+summary(mod_ft_an_3)
+boxplot(Kth_Tige ~ site_type, data = anarchi_Ft)
+
+
+tuk_ft_an_3 <- glht(mod_ft_an_3_aov, linfct = mcp(site_type = "Tukey"))
+# test de Tukey:
+summary(mod_ft_an_3) 
+
+tuk.cld_ft_an_3 <- cld(tuk_ft_an_3, decreasing = TRUE)   
+tuk.cld_ft_an_3 $mcletters$Letters
+```
+
+### Helianthemum oelandicum
+No site models: Helianthemum was only sampled in T
+
+## Anatomy and architecture
