@@ -1,0 +1,518 @@
+{
+  "vaultName": "malo",
+  "lastExport": 1738346259313,
+  "pluginVersion": "1.8.01",
+  "validBodyClasses": "publish css-settings-manager theme-dark show-inline-title show-ribbon",
+  "useCustomHeadContent": false,
+  "useCustomFavicon": false,
+  "files": [
+    "100 - Science/120 - Myco/121 - Biblio/0_archi-anat-summary.canvas",
+    "100 - Science/120 - Myco/121 - Biblio/ANAT.md",
+    "100 - Science/120 - Myco/121 - Biblio/ARCHI.md",
+    "100 - Science/120 - Myco/121 - Biblio/Architectural differences and variability in the relationship with light between open - closed environments in savanna.md",
+    "100 - Science/120 - Myco/121 - Biblio/Biomass, allocation, and shape changes following light and fire treatment.md",
+    "100 - Science/120 - Myco/121 - Biblio/Branching patterns in Thymus vulgaris.md",
+    "100 - Science/120 - Myco/121 - Biblio/Branching patterns-Acrotonic, mesotonic, basitonic.md",
+    "100 - Science/120 - Myco/121 - Biblio/Branching ratio.md",
+    "100 - Science/120 - Myco/121 - Biblio/Common trait tradeoffs in forest vs savanna environments.md",
+    "100 - Science/120 - Myco/121 - Biblio/Conductivity - safety trade-off.md",
+    "100 - Science/120 - Myco/121 - Biblio/Definitions of cavitation and embolism.md",
+    "100 - Science/120 - Myco/121 - Biblio/Differences in ortho-plagiotropy in sun vs shade individuals and functional implications.md",
+    "100 - Science/120 - Myco/121 - Biblio/Drought resistance strategies and main mechanisms evolved.md",
+    "100 - Science/120 - Myco/121 - Biblio/Embolism spreading and vessel density.md",
+    "100 - Science/120 - Myco/121 - Biblio/Impact of mycorrhizae on stress tolerance with taller individuals.md",
+    "100 - Science/120 - Myco/121 - Biblio/Narrower safety margins in roots.md",
+    "100 - Science/120 - Myco/121 - Biblio/Negative correlation between root diameter and conductivity.md",
+    "100 - Science/120 - Myco/121 - Biblio/Orthotropy and plagiotropy.md",
+    "100 - Science/120 - Myco/121 - Biblio/Plant height is linked to wider conduits.md",
+    "100 - Science/120 - Myco/121 - Biblio/Plant height, vessel size, moisture conditions and vulnerability.md",
+    "100 - Science/120 - Myco/121 - Biblio/Rare pore hypothesis.md",
+    "100 - Science/120 - Myco/121 - Biblio/Reiteration processes in Thymus vulgaris.md",
+    "100 - Science/120 - Myco/121 - Biblio/Tissue mass density.md",
+    "100 - Science/120 - Myco/121 - Biblio/Variability in root hydraulic properties.md",
+    "100 - Science/zotero_notes/anestEvolvingStructureClimatic2021.md",
+    "100 - Science/zotero_notes/anfodilloTreeMortalityTesting2021.md",
+    "100 - Science/zotero_notes/archibaldGrowingTallVs2003.md",
+    "100 - Science/zotero_notes/avilaRelativeAreaVessels2023.md",
+    "100 - Science/zotero_notes/baasSystematicPhylogeneticEcological1982a.md",
+    "100 - Science/zotero_notes/barthelemyPlantArchitectureDynamic2007.md",
+    "100 - Science/zotero_notes/chomickiEvolutionEcologyPlant2017.md",
+    "100 - Science/zotero_notes/corcueraRadialgrowthWoodanatomicalChanges2006.md",
+    "100 - Science/zotero_notes/costaEnemyUnwillingGuest2019.md",
+    "100 - Science/zotero_notes/gignouxAllocationStrategiesSavanna2016.md",
+    "100 - Science/zotero_notes/gleasonWeakTradeoffXylem2016.md",
+    "100 - Science/zotero_notes/grataniPlantPhenotypicPlasticity2014.md",
+    "100 - Science/zotero_notes/hackeDroughtExperienceCavitation2000.md",
+    "100 - Science/zotero_notes/hammondDisentanglingLocalMetapopulation2020.md",
+    "100 - Science/zotero_notes/hummelRelatingRootStructure2007.md",
+    "100 - Science/zotero_notes/jabinServiceEternelEthnographie2016.md",
+    "100 - Science/zotero_notes/kunzePartitioningSpeciesContributions2025.md",
+    "100 - Science/zotero_notes/lensTestingHypothesesThat2011.md",
+    "100 - Science/zotero_notes/martinez-vilaltaXylemHydraulicProperties2002.md",
+    "100 - Science/zotero_notes/millanDecipheringGrowthForm2019.md",
+    "100 - Science/zotero_notes/navasPlasticityWholePlant2002.md",
+    "100 - Science/zotero_notes/olsonPlantHeightHydraulic2018.md",
+    "100 - Science/zotero_notes/riegerRootSystemHydraulic1999.md",
+    "100 - Science/zotero_notes/salmonArchitecturalTraitsUnderlie2023.md",
+    "100 - Science/zotero_notes/shemeshArchitecturalPlasticityMediterranean2012.md",
+    "100 - Science/zotero_notes/torres-ruizDifferencesFunctionalXylem2017.md",
+    "100 - Science/zotero_notes/valladaresFunctionalEcologyShoot1998.md",
+    "100 - Science/zotero_notes/vilagrosaXylemCavitationEmbolism2012.md",
+    "100 - Science/zotero_notes/wangStabilitySynchronyEcological2019.md",
+    "100 - Science/zotero_notes/wheelerIntervesselPittingCavitation2005.md",
+    "100 - Science/zotero_notes/zhangWorldwideAllometricRelationship2023.md",
+    "100 - Science/zotero_notes/zuppiGrowingGrownGone2022.md",
+    "lib/fonts/94f2f163d4b698242fef.otf",
+    "lib/fonts/72505e6a122c6acd5471.woff2",
+    "lib/fonts/2d5198822ab091ce4305.woff2",
+    "lib/fonts/c8ba52b05a9ef10f4758.woff2",
+    "lib/fonts/cb10ffd7684cd9836a05.woff2",
+    "lib/fonts/b5f0f109bc88052d4000.woff2",
+    "lib/fonts/cbe0ae49c52c920fd563.woff2",
+    "lib/fonts/535a6cf662596b3bd6a6.woff2",
+    "lib/fonts/70cc7ff27245e82ad414.ttf",
+    "lib/fonts/454577c22304619db035.ttf",
+    "lib/fonts/52ac8f3034507f1d9e53.ttf",
+    "lib/fonts/05b618077343fbbd92b7.ttf",
+    "lib/fonts/4bb6ac751d1c5478ff3a.woff2",
+    "lib/media/6155340132a851f6089e.svg"
+  ],
+  "mainDependencies": [
+    "lib/fonts/94f2f163d4b698242fef.otf",
+    "lib/fonts/72505e6a122c6acd5471.woff2",
+    "lib/fonts/2d5198822ab091ce4305.woff2",
+    "lib/fonts/c8ba52b05a9ef10f4758.woff2",
+    "lib/fonts/cb10ffd7684cd9836a05.woff2",
+    "lib/fonts/b5f0f109bc88052d4000.woff2",
+    "lib/fonts/cbe0ae49c52c920fd563.woff2",
+    "lib/fonts/535a6cf662596b3bd6a6.woff2",
+    "lib/fonts/70cc7ff27245e82ad414.ttf",
+    "lib/fonts/454577c22304619db035.ttf",
+    "lib/fonts/52ac8f3034507f1d9e53.ttf",
+    "lib/fonts/05b618077343fbbd92b7.ttf",
+    "lib/fonts/4bb6ac751d1c5478ff3a.woff2",
+    "lib/media/6155340132a851f6089e.svg"
+  ],
+  "fileInfo": {
+    "100 - Science/120 - Myco/121 - Biblio/0_archi-anat-summary.canvas": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 19598,
+      "exportedPath": "100 - Science/120 - Myco/121 - Biblio/0_archi-anat-summary.html",
+      "dependencies": []
+    },
+    "100 - Science/120 - Myco/121 - Biblio/ANAT.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 0,
+      "exportedPath": "100 - Science/120 - Myco/121 - Biblio/ANAT.html",
+      "dependencies": []
+    },
+    "100 - Science/120 - Myco/121 - Biblio/ARCHI.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 45,
+      "exportedPath": "100 - Science/120 - Myco/121 - Biblio/ARCHI.html",
+      "dependencies": []
+    },
+    "100 - Science/120 - Myco/121 - Biblio/Architectural differences and variability in the relationship with light between open - closed environments in savanna.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 472,
+      "exportedPath": "100 - Science/120 - Myco/121 - Biblio/Architectural differences and variability in the relationship with light between open - closed environments in savanna.html",
+      "dependencies": []
+    },
+    "100 - Science/120 - Myco/121 - Biblio/Biomass, allocation, and shape changes following light and fire treatment.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 919,
+      "exportedPath": "100 - Science/120 - Myco/121 - Biblio/Biomass, allocation, and shape changes following light and fire treatment.html",
+      "dependencies": []
+    },
+    "100 - Science/120 - Myco/121 - Biblio/Branching patterns in Thymus vulgaris.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 1427,
+      "exportedPath": "100 - Science/120 - Myco/121 - Biblio/Branching patterns in Thymus vulgaris.html",
+      "dependencies": []
+    },
+    "100 - Science/120 - Myco/121 - Biblio/Branching patterns-Acrotonic, mesotonic, basitonic.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 253,
+      "exportedPath": "100 - Science/120 - Myco/121 - Biblio/Branching patterns-Acrotonic, mesotonic, basitonic.html",
+      "dependencies": []
+    },
+    "100 - Science/120 - Myco/121 - Biblio/Branching ratio.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 587,
+      "exportedPath": "100 - Science/120 - Myco/121 - Biblio/Branching ratio.html",
+      "dependencies": []
+    },
+    "100 - Science/120 - Myco/121 - Biblio/Common trait tradeoffs in forest vs savanna environments.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 511,
+      "exportedPath": "100 - Science/120 - Myco/121 - Biblio/Common trait tradeoffs in forest vs savanna environments.html",
+      "dependencies": []
+    },
+    "100 - Science/120 - Myco/121 - Biblio/Conductivity - safety trade-off.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 670,
+      "exportedPath": "100 - Science/120 - Myco/121 - Biblio/Conductivity - safety trade-off.html",
+      "dependencies": []
+    },
+    "100 - Science/120 - Myco/121 - Biblio/Definitions of cavitation and embolism.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 1032,
+      "exportedPath": "100 - Science/120 - Myco/121 - Biblio/Definitions of cavitation and embolism.html",
+      "dependencies": []
+    },
+    "100 - Science/120 - Myco/121 - Biblio/Differences in ortho-plagiotropy in sun vs shade individuals and functional implications.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 718,
+      "exportedPath": "100 - Science/120 - Myco/121 - Biblio/Differences in ortho-plagiotropy in sun vs shade individuals and functional implications.html",
+      "dependencies": []
+    },
+    "100 - Science/120 - Myco/121 - Biblio/Drought resistance strategies and main mechanisms evolved.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 692,
+      "exportedPath": "100 - Science/120 - Myco/121 - Biblio/Drought resistance strategies and main mechanisms evolved.html",
+      "dependencies": []
+    },
+    "100 - Science/120 - Myco/121 - Biblio/Embolism spreading and vessel density.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 807,
+      "exportedPath": "100 - Science/120 - Myco/121 - Biblio/Embolism spreading and vessel density.html",
+      "dependencies": []
+    },
+    "100 - Science/120 - Myco/121 - Biblio/Impact of mycorrhizae on stress tolerance with taller individuals.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 476,
+      "exportedPath": "100 - Science/120 - Myco/121 - Biblio/Impact of mycorrhizae on stress tolerance with taller individuals.html",
+      "dependencies": []
+    },
+    "100 - Science/120 - Myco/121 - Biblio/Narrower safety margins in roots.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 607,
+      "exportedPath": "100 - Science/120 - Myco/121 - Biblio/Narrower safety margins in roots.html",
+      "dependencies": []
+    },
+    "100 - Science/120 - Myco/121 - Biblio/Negative correlation between root diameter and conductivity.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 337,
+      "exportedPath": "100 - Science/120 - Myco/121 - Biblio/Negative correlation between root diameter and conductivity.html",
+      "dependencies": []
+    },
+    "100 - Science/120 - Myco/121 - Biblio/Orthotropy and plagiotropy.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 735,
+      "exportedPath": "100 - Science/120 - Myco/121 - Biblio/Orthotropy and plagiotropy.html",
+      "dependencies": []
+    },
+    "100 - Science/120 - Myco/121 - Biblio/Plant height is linked to wider conduits.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 934,
+      "exportedPath": "100 - Science/120 - Myco/121 - Biblio/Plant height is linked to wider conduits.html",
+      "dependencies": []
+    },
+    "100 - Science/120 - Myco/121 - Biblio/Plant height, vessel size, moisture conditions and vulnerability.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 819,
+      "exportedPath": "100 - Science/120 - Myco/121 - Biblio/Plant height, vessel size, moisture conditions and vulnerability.html",
+      "dependencies": []
+    },
+    "100 - Science/120 - Myco/121 - Biblio/Rare pore hypothesis.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 932,
+      "exportedPath": "100 - Science/120 - Myco/121 - Biblio/Rare pore hypothesis.html",
+      "dependencies": []
+    },
+    "100 - Science/120 - Myco/121 - Biblio/Reiteration processes in Thymus vulgaris.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 454,
+      "exportedPath": "100 - Science/120 - Myco/121 - Biblio/Reiteration processes in Thymus vulgaris.html",
+      "dependencies": []
+    },
+    "100 - Science/120 - Myco/121 - Biblio/Tissue mass density.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 357,
+      "exportedPath": "100 - Science/120 - Myco/121 - Biblio/Tissue mass density.html",
+      "dependencies": []
+    },
+    "100 - Science/120 - Myco/121 - Biblio/Variability in root hydraulic properties.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 393,
+      "exportedPath": "100 - Science/120 - Myco/121 - Biblio/Variability in root hydraulic properties.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/anestEvolvingStructureClimatic2021.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 634,
+      "exportedPath": "100 - Science/zotero_notes/anestEvolvingStructureClimatic2021.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/anfodilloTreeMortalityTesting2021.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 3202,
+      "exportedPath": "100 - Science/zotero_notes/anfodilloTreeMortalityTesting2021.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/archibaldGrowingTallVs2003.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 1887,
+      "exportedPath": "100 - Science/zotero_notes/archibaldGrowingTallVs2003.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/avilaRelativeAreaVessels2023.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 1796,
+      "exportedPath": "100 - Science/zotero_notes/avilaRelativeAreaVessels2023.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/baasSystematicPhylogeneticEcological1982a.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 407,
+      "exportedPath": "100 - Science/zotero_notes/baasSystematicPhylogeneticEcological1982a.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/barthelemyPlantArchitectureDynamic2007.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 1853,
+      "exportedPath": "100 - Science/zotero_notes/barthelemyPlantArchitectureDynamic2007.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/chomickiEvolutionEcologyPlant2017.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 551,
+      "exportedPath": "100 - Science/zotero_notes/chomickiEvolutionEcologyPlant2017.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/corcueraRadialgrowthWoodanatomicalChanges2006.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 879,
+      "exportedPath": "100 - Science/zotero_notes/corcueraRadialgrowthWoodanatomicalChanges2006.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/costaEnemyUnwillingGuest2019.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 502,
+      "exportedPath": "100 - Science/zotero_notes/costaEnemyUnwillingGuest2019.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/gignouxAllocationStrategiesSavanna2016.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 1493,
+      "exportedPath": "100 - Science/zotero_notes/gignouxAllocationStrategiesSavanna2016.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/gleasonWeakTradeoffXylem2016.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 982,
+      "exportedPath": "100 - Science/zotero_notes/gleasonWeakTradeoffXylem2016.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/grataniPlantPhenotypicPlasticity2014.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 861,
+      "exportedPath": "100 - Science/zotero_notes/grataniPlantPhenotypicPlasticity2014.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/hackeDroughtExperienceCavitation2000.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 997,
+      "exportedPath": "100 - Science/zotero_notes/hackeDroughtExperienceCavitation2000.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/hammondDisentanglingLocalMetapopulation2020.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 3167,
+      "exportedPath": "100 - Science/zotero_notes/hammondDisentanglingLocalMetapopulation2020.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/hummelRelatingRootStructure2007.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 4019,
+      "exportedPath": "100 - Science/zotero_notes/hummelRelatingRootStructure2007.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/jabinServiceEternelEthnographie2016.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 372,
+      "exportedPath": "100 - Science/zotero_notes/jabinServiceEternelEthnographie2016.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/kunzePartitioningSpeciesContributions2025.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 4086,
+      "exportedPath": "100 - Science/zotero_notes/kunzePartitioningSpeciesContributions2025.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/lensTestingHypothesesThat2011.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 1453,
+      "exportedPath": "100 - Science/zotero_notes/lensTestingHypothesesThat2011.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/martinez-vilaltaXylemHydraulicProperties2002.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 2892,
+      "exportedPath": "100 - Science/zotero_notes/martinez-vilaltaXylemHydraulicProperties2002.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/millanDecipheringGrowthForm2019.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 1607,
+      "exportedPath": "100 - Science/zotero_notes/millanDecipheringGrowthForm2019.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/navasPlasticityWholePlant2002.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 520,
+      "exportedPath": "100 - Science/zotero_notes/navasPlasticityWholePlant2002.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/olsonPlantHeightHydraulic2018.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 717,
+      "exportedPath": "100 - Science/zotero_notes/olsonPlantHeightHydraulic2018.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/riegerRootSystemHydraulic1999.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 589,
+      "exportedPath": "100 - Science/zotero_notes/riegerRootSystemHydraulic1999.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/salmonArchitecturalTraitsUnderlie2023.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 1070,
+      "exportedPath": "100 - Science/zotero_notes/salmonArchitecturalTraitsUnderlie2023.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/shemeshArchitecturalPlasticityMediterranean2012.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 446,
+      "exportedPath": "100 - Science/zotero_notes/shemeshArchitecturalPlasticityMediterranean2012.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/torres-ruizDifferencesFunctionalXylem2017.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 1845,
+      "exportedPath": "100 - Science/zotero_notes/torres-ruizDifferencesFunctionalXylem2017.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/valladaresFunctionalEcologyShoot1998.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 1278,
+      "exportedPath": "100 - Science/zotero_notes/valladaresFunctionalEcologyShoot1998.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/vilagrosaXylemCavitationEmbolism2012.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 2672,
+      "exportedPath": "100 - Science/zotero_notes/vilagrosaXylemCavitationEmbolism2012.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/wangStabilitySynchronyEcological2019.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 2835,
+      "exportedPath": "100 - Science/zotero_notes/wangStabilitySynchronyEcological2019.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/wheelerIntervesselPittingCavitation2005.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 1115,
+      "exportedPath": "100 - Science/zotero_notes/wheelerIntervesselPittingCavitation2005.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/zhangWorldwideAllometricRelationship2023.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 547,
+      "exportedPath": "100 - Science/zotero_notes/zhangWorldwideAllometricRelationship2023.html",
+      "dependencies": []
+    },
+    "100 - Science/zotero_notes/zuppiGrowingGrownGone2022.md": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 435,
+      "exportedPath": "100 - Science/zotero_notes/zuppiGrowingGrownGone2022.html",
+      "dependencies": []
+    },
+    "lib/fonts/94f2f163d4b698242fef.otf": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 66800,
+      "exportedPath": "lib/fonts/94f2f163d4b698242fef.otf",
+      "dependencies": []
+    },
+    "lib/fonts/72505e6a122c6acd5471.woff2": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 104232,
+      "exportedPath": "lib/fonts/72505e6a122c6acd5471.woff2",
+      "dependencies": []
+    },
+    "lib/fonts/2d5198822ab091ce4305.woff2": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 104332,
+      "exportedPath": "lib/fonts/2d5198822ab091ce4305.woff2",
+      "dependencies": []
+    },
+    "lib/fonts/c8ba52b05a9ef10f4758.woff2": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 98868,
+      "exportedPath": "lib/fonts/c8ba52b05a9ef10f4758.woff2",
+      "dependencies": []
+    },
+    "lib/fonts/cb10ffd7684cd9836a05.woff2": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 106876,
+      "exportedPath": "lib/fonts/cb10ffd7684cd9836a05.woff2",
+      "dependencies": []
+    },
+    "lib/fonts/b5f0f109bc88052d4000.woff2": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 105804,
+      "exportedPath": "lib/fonts/b5f0f109bc88052d4000.woff2",
+      "dependencies": []
+    },
+    "lib/fonts/cbe0ae49c52c920fd563.woff2": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 106108,
+      "exportedPath": "lib/fonts/cbe0ae49c52c920fd563.woff2",
+      "dependencies": []
+    },
+    "lib/fonts/535a6cf662596b3bd6a6.woff2": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 111708,
+      "exportedPath": "lib/fonts/535a6cf662596b3bd6a6.woff2",
+      "dependencies": []
+    },
+    "lib/fonts/70cc7ff27245e82ad414.ttf": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 192740,
+      "exportedPath": "lib/fonts/70cc7ff27245e82ad414.ttf",
+      "dependencies": []
+    },
+    "lib/fonts/454577c22304619db035.ttf": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 161376,
+      "exportedPath": "lib/fonts/454577c22304619db035.ttf",
+      "dependencies": []
+    },
+    "lib/fonts/52ac8f3034507f1d9e53.ttf": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 191568,
+      "exportedPath": "lib/fonts/52ac8f3034507f1d9e53.ttf",
+      "dependencies": []
+    },
+    "lib/fonts/05b618077343fbbd92b7.ttf": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 155288,
+      "exportedPath": "lib/fonts/05b618077343fbbd92b7.ttf",
+      "dependencies": []
+    },
+    "lib/fonts/4bb6ac751d1c5478ff3a.woff2": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 7876,
+      "exportedPath": "lib/fonts/4bb6ac751d1c5478ff3a.woff2",
+      "dependencies": []
+    },
+    "lib/media/6155340132a851f6089e.svg": {
+      "modifiedTime": 1738346259313,
+      "sourceSize": 315,
+      "exportedPath": "lib/media/6155340132a851f6089e.svg",
+      "dependencies": []
+    }
+  }
+}
