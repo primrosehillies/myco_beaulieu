@@ -1,0 +1,847 @@
+---
+title: "Anatomy and architecture summary"
+author: "Malo"
+date: "2025-01-17"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    toc_depth: 5
+    theme: cosmo
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(jpeg)
+library(purrr)
+library(psych)
+library(lme4)
+library(multcomp)
+library(multcompView)
+
+library(FactoMineR)
+library(explor)
+library(missMDA)
+library(factoextra)
+
+
+library(tidyverse)
+
+```
+
+Created from anat_archi_summary_v2.Rmd
+
+
+# Creating datasets
+## Anatomy
+### Image dimensions
+
+```{r}
+#####Getting image dimensions####
+# list JPG files in a directory
+square_files <- list.files(path = "square/square-per_year/b&w-all_done/pictures", pattern = "\\.jpg$", full.names = TRUE)
+
+
+get_image_dimensions <- function(image_path) {
+  img <- readJPEG(image_path, native = TRUE)  # Load the image
+  list(
+    file = basename(image_path),             
+    width_px = attr(img, "dim")[2],             
+    height_px = attr(img, "dim")[1]              
+  )
+}
+
+
+#function to all images
+image_dimensions <- lapply(square_files, get_image_dimensions)
+
+#get data frame
+image_dimensions_df <- do.call(rbind.data.frame, image_dimensions)
+
+#####Making variables in good format####
+
+image_dimensions_df$id_complete <- gsub("_square\\.jpg$", "", image_dimensions_df$file)
+
+image_dimensions_df$id_amap <- substr(image_dimensions_df$id_complete, 1, 4)
+
+
+image_dimensions_df$id_complete2 <- ifelse(
+  nchar(image_dimensions_df$id_complete) == 33,
+  paste0(substr(image_dimensions_df$id_complete, 1, 17), "0", substr(image_dimensions_df$id_complete, 18, nchar(image_dimensions_df$id_complete))),
+  image_dimensions_df$id_complete
+)
+image_dimensions_df$id_complete3 <- ifelse(
+  nchar(image_dimensions_df$id_complete2) == 35,
+  paste0(substr(image_dimensions_df$id_complete2, 1, 17), "0", substr(image_dimensions_df$id_complete2, 18, nchar(image_dimensions_df$id_complete2))),
+  image_dimensions_df$id_complete2
+)
+
+
+image_dimensions_df$id_complete4 <- gsub("Tige", "T", image_dimensions_df$id_complete3)
+image_dimensions_df$id_complete5 <- gsub("Racine", "R", image_dimensions_df$id_complete4)
+
+
+image_dimensions_df$id_complete6 <- gsub("-", "_", image_dimensions_df$id_complete5)
+
+split_names <- strsplit(image_dimensions_df$id_complete6, "_")
+
+image_dimensions_df$year <- sapply(split_names, function(x) x[2]) # Second element (year)
+image_dimensions_df$site <- sapply(split_names, function(x) x[3])      # Third element (T1)
+image_dimensions_df$species <- sapply(split_names, function(x) x[4])  # Fourth element (Ho2)
+image_dimensions_df$id_lucas <- sapply(split_names, function(x) x[5]) # Fifth element (03)
+image_dimensions_df$organ <- sapply(split_names, function(x) x[6])    # Sixth element (T)
+image_dimensions_df$zoom <- sapply(split_names, function(x) x[7])     # Seventh element (X200)
+image_dimensions_df$coupe_µm <- sapply(split_names, function(x) x[8]) # Eighth element (09µm)
+
+
+image_dimensions_df$site_type <- substr(image_dimensions_df$site, 1, 1)  # First character (T)
+image_dimensions_df$site_replicate <- substr(image_dimensions_df$site, 2, nchar(image_dimensions_df$site))  # Remaining characters (1)
+
+
+image_dimensions_df$micro <- ifelse(grepl("[a-z]", image_dimensions_df$site_type), 1, 0)
+
+image_dimensions_df$site_type <- toupper(image_dimensions_df$site_type)
+
+
+image_dimensions_df$species_name <- substr(image_dimensions_df$species, 1, 2) 
+image_dimensions_df$species_site_replicate <- substr(image_dimensions_df$species, 3, nchar(image_dimensions_df$species))  # Remaining characters (e.g., "1")
+
+
+image_dimensions_df$width_µm <- image_dimensions_df$width_px / 1.9111
+image_dimensions_df$height_µm <- image_dimensions_df$height_px / 1.9111
+
+image_dimensions_df$image_surface_µm2 <- image_dimensions_df$width_µm * image_dimensions_df$height_µm
+
+#####Final dataset####
+anat <- data.frame(
+  file = image_dimensions_df$file,
+  id_complete = image_dimensions_df$id_complete6,
+  image_surface_µm2 = image_dimensions_df$image_surface_µm2,
+  id_amap = image_dimensions_df$id_amap,
+  number = image_dimensions_df$id_lucas,
+  site = image_dimensions_df$site,
+  site_type = image_dimensions_df$site_type,
+  site_replicate = image_dimensions_df$site_replicate,
+  species_site_replicate = image_dimensions_df$species,
+  species = image_dimensions_df$species_name,
+  species_replicate = image_dimensions_df$species_site_replicate,
+  micro = image_dimensions_df$micro,
+  organ = image_dimensions_df$organ,
+  year = image_dimensions_df$year,
+  
+  
+  stringsAsFactors = FALSE
+)
+
+
+# anat <- anat %>%
+#   pivot_wider(names_from = "year", names_prefix = "year_", values_from = "image_surface_µm2")
+
+```
+
+### Ring measurements from the last 3 years
+
+```{r}
+cernes <- read.csv("cernes-03.csv", header=T)
+
+# cernes_wide <- cernes %>%
+#   pivot_wider(names_from = "Year", names_prefix = "Ring_Size_Year_", values_from = "Length")
+# 
+# cernes_wide$id_amap <- substr(cernes_wide$Label, 1, 4)
+# cernes_wide <- cernes_wide %>%
+#   select(-Label)
+
+cernes$id_amap <- substr(cernes$Label, 1, 4) 
+cernes <- cernes %>%
+  select(-Label) 
+cernes$year <- cernes$Year
+cernes <- cernes %>%
+  select(-Year)
+
+cernes$year <- as.character(cernes$year)
+
+anat <- anat %>%
+  left_join(cernes, by = c("id_amap", "year"))
+#There are 3 more rows in cernes: it's normal, they are 3 NAs for the individuals in which there are less than 4 rings
+
+
+```
+
+
+### Calculating vessel conductivity, clusters, size, diameter...
+
+```{r}
+vessel <- read.csv(file = "square/square-per_year/b&w-all_done/data/vessels-per_year.csv", header = T)
+vessel$file <- vessel$Label
+#anat <- read.csv(file = "anat_9.csv", header = T, stringsAsFactors = T)
+anat$id_amap <- as.character(anat$id_amap)
+#Files will change if data is updated
+
+
+vessel$id_amap <- as.factor(substr(vessel$file, 1, 4))
+vessel$year <- as.factor(substr(vessel$file, 6, 9))
+
+#####Clusters####
+# # clustering function
+# cluster_vessels <- function(data) {
+# #Compute radii
+#   data$Radius <- sqrt(data$Area / pi)
+#   data$Radius_enhanced <- data$Radius + 4.5
+#   
+# #distance between every vessel
+# distances <- as.matrix(dist(data[, c("X", "Y")], method = "euclidean"))
+# radius_matrix <- outer(data$Radius_enhanced, data$Radius_enhanced, "+")
+# perimeter_distances <- distances - radius_matrix
+#   
+# data$Cluster <- 0
+# cluster_id <- 1
+#   
+# #Clustering
+#   repeat {
+#     changes <- FALSE
+#     
+#     for (i in seq_len(nrow(perimeter_distances))) {
+#       if (data$Cluster[i] == 0) {
+#         data$Cluster[i] <- cluster_id
+#         nearby <- which(perimeter_distances[i, ] <= 0)
+#         data$Cluster[nearby] <- cluster_id
+#         changes <- TRUE
+#         cluster_id <- cluster_id + 1
+#       }
+#     }
+#     
+#     for (i in seq_len(nrow(perimeter_distances) - 1)) {
+#       for (j in seq(i + 1, nrow(perimeter_distances))) {
+#         if (perimeter_distances[i, j] <= 0) {
+#           if (data$Cluster[i] != data$Cluster[j]) {
+#             old_cluster <- data$Cluster[j]
+#             new_cluster <- data$Cluster[i]
+#             data$Cluster[data$Cluster == old_cluster] <- new_cluster
+#             changes <- TRUE
+#           }
+#         }
+#       }
+#     }
+#     
+#     if (!changes) break
+#   }
+#   
+#   return(data)
+# }
+# 
+# #Group by `id_amap` and apply clustering
+# vessel <- vessel %>%
+#   group_by(id_amap) %>%
+#   group_split() %>%
+#   map_dfr(cluster_vessels)
+
+
+
+#####Getting proper surface by getting rid of big empty areas and getting rid of extremes####
+vessel_mean <- vessel %>%
+  group_by(id_amap, year) %>%
+  summarize(mean = mean(Area))
+
+vessel_extreme <- vessel %>%
+  filter(Area > 1200)
+
+
+vessel_extreme_sum <- vessel_extreme %>%
+  group_by(id_amap, year) %>%
+  summarize(sum = sum(Area))
+
+vessel_extreme_sum$id_amap <- as.character(vessel_extreme_sum$id_amap)
+anat$id_amap <- as.character(anat$id_amap)
+vessel_extreme_sum <- vessel_extreme_sum %>%
+  full_join(anat, by = c("id_amap", "year"))
+
+vessel_extreme_sum$sum[is.na(vessel_extreme_sum$sum)] <- 0
+vessel_extreme_sum$image_surface_rectified_µm2 <- vessel_extreme_sum$image_surface_µm2 - vessel_extreme_sum$sum
+
+vessel_extreme_sum <- vessel_extreme_sum %>%
+  dplyr::select(id_amap, year, image_surface_rectified_µm2)
+
+anat <- anat %>%
+  left_join(vessel_extreme_sum, by = c("id_amap", "year"))
+
+#####Calculating mean, standard deviation, sum, count, dh####
+#Getting rid of big vessels
+vessel_1200 <- vessel %>%
+  select(id_amap, year, Area, Perim.) %>%
+  filter(Area <= 1200) %>%
+  mutate(diameter = 2*sqrt(Area/pi),
+         d4 = diameter^4)
+#Cluster
+# vessel_summary_pre <- vessel_1200 %>%
+#   group_by(id_amap) %>%
+#   distinct(Cluster) %>%
+#   summarize(count_cluster = n())
+
+  
+vessel_summary_pre <- vessel_1200 %>%
+  group_by(id_amap, year) %>%
+  summarize(mean_vessel_size_µm2 = mean(Area),
+            std_dev_vessel_size_µm2 = sd(Area),
+            mean_vessel_perim_µm = mean(Perim.),
+            std_dev_perim_µm = sd(Perim.),
+            sum_vessel_area_µm2 = sum(Area),
+            dh = (sum(d4)/n())^0.25,
+            count_vessel = n()
+            ) 
+
+# vessel_summary <- vessel_summary_pre2 %>%
+#   left_join(vessel_summary_pre, by = "id_amap") %>%
+#   mutate(vessel_grouping = count_vessel / count_cluster)
+
+#####Calculating vessel density and Kth####
+vessel_summary <- anat %>%
+  select(id_amap, year, image_surface_rectified_µm2) %>%
+  left_join(vessel_summary_pre, by = c("id_amap", "year"))
+
+vessel_summary$image_surface_rectified_mm2 <- vessel_summary$image_surface_rectified_µm2 / 1000000
+
+vessel_summary$vessel_density_per_mm2 <- vessel_summary$count_vessel / vessel_summary$image_surface_rectified_mm2
+vessel_summary$vessel_density_per_m2 <- vessel_summary$vessel_density_per_mm2 * 10^6
+vessel_summary$dh_m <- vessel_summary$dh * 10^-6
+vessel_summary$vessel_area <- vessel_summary$sum_vessel_area_µm2 / vessel_summary$image_surface_rectified_µm2
+
+
+#Getting Kth
+
+water_density <- 998.2
+water_viscosity <- 1.002*10^-9
+hagen_poiseuille <- (pi * water_density) / (128 * water_viscosity)
+
+vessel_summary$Kth <- hagen_poiseuille * vessel_summary$vessel_density_per_m2 * vessel_summary$dh_m^4
+
+
+
+
+plot(vessel_summary$vessel_density_per_mm2, vessel_summary$Kth)
+
+summary(vessel_summary)
+#####
+# write.csv(vessel_summary, file = "vessel_summary_6.csv")
+# write.csv(anat, file = "anat_10.csv")
+```
+
+### Making a wide dataset with organ / year
+
+```{r}
+#anat <- read.csv(file = "anat_10.csv", header = T, stringsAsFactors = T)
+
+#####Preparing the data####
+# anat <- anat %>%
+#   select(-X.1, -X)
+
+anat$id_amap <- as.character(anat$id_amap)
+vessel_summary$id_amap <- substr(image_dimensions_df$id_complete, 1, 4)
+
+anat <- anat %>%
+  left_join(vessel_summary, by = c("id_amap", "year"))
+anat$number <- as.factor(anat$number)
+anat$count_vessel <- as.numeric(anat$count_vessel)
+anat$id_amap <- as.numeric(anat$id_amap)
+
+anat <- anat %>%
+  rename(ring_length_µm = "Length")
+
+anat <- anat %>%
+  select(-image_surface_µm2, -image_surface_rectified_µm2.x, -image_surface_rectified_µm2.y)
+
+
+anat_complete <- anat %>%
+  dplyr::select(-site, -site_type, -site_replicate, -species_site_replicate, -species, -species_replicate, -micro, -id_amap, -file, -id_complete) %>%
+  complete(number, organ, year) %>%
+  select(number, organ, year, c("ring_length_µm", "mean_vessel_size_µm2", "sum_vessel_area_µm2", "vessel_density_per_mm2", "vessel_area", "Kth"))
+
+
+anat_wide <- anat_complete %>%
+  pivot_wider(names_from = c(organ, year),
+              values_from = c("ring_length_µm", "mean_vessel_size_µm2", "sum_vessel_area_µm2", "vessel_density_per_mm2", "vessel_area", "Kth"))
+
+
+
+
+#####Creating stem and root datasets####
+# numerical_cols <- c("ring_length_µm", "mean_vessel_size_µm2", "std_dev_vessel_size_µm2", "mean_vessel_perim_µm", "std_dev_perim_µm", "sum_vessel_area_µm2", "dh", "count_vessel", "image_surface_rectified_mm2", "vessel_density_per_mm2", "vessel_density_per_m2", "dh_m", "vessel_area", "Kth")
+# 
+# anat_Racine <- anat %>% 
+#   filter(organ == "R") %>%
+#   dplyr::select(all_of(numerical_cols), number, year) %>%
+#   rename_with(~ paste0(., "_Racine"), all_of(numerical_cols))
+# 
+# anat_Tige <- anat %>% 
+#   filter(organ == "T") %>%
+#   dplyr::select(all_of(numerical_cols), number, year) %>%
+#   rename_with(~ paste0(., "_Tige"), all_of(numerical_cols))
+# #####Binding root and stem datasets and selecting variables####
+# anat_Tige_Racine <- anat_Tige %>%
+#   full_join(anat_Racine, by = c("number", "year"))
+# #keeping metadata aside
+# anat_metadata <- anat %>%
+#   dplyr::select(number, site, site_type, site_replicate, species_site_replicate, species, species_replicate, micro) %>%
+#   distinct(number, site, site_type, site_replicate, species_site_replicate, species, species_replicate, micro)
+# 
+# 
+# anat_combined <- anat_metadata %>%
+#   left_join(anat_Tige_Racine, by = "number")
+# 
+# one_ninety <- read.csv("1_90.csv", header = T, stringsAsFactors = T)
+# anat_combined$number <- as.character(anat_combined$number)
+# one_ninety$number <- as.character(one_ninety$number)
+# 
+# anat_combined <- anat_combined %>%
+#   full_join(one_ninety, by = "number")
+# anat_combined$number <- as.integer(anat_combined$number)
+#####
+```
+
+## Architecture
+### Binding anatomy dataset with architecture
+
+```{r}
+archi <- read.csv("archi_2.csv", header =T)
+metadata <- read.csv("metadata.csv", header = T)
+
+#####Joining datasets####
+metadata$number <- as.character(metadata$number)
+archi$number <- as.character(archi$num)
+anat_wide$number <- as.numeric(anat_wide$number)
+anat_wide$number <- as.character(anat_wide$number)
+
+str(anat_wide$number)
+str(archi$number)
+
+anarchi <- archi %>%
+  dplyr::select(-X, -code, -species, -site_type, -site_replicate, -site, -micro, -num) %>%
+  full_join(anat_wide, by = "number")
+
+anarchi <- anarchi %>%
+  select(-site,-site_type, -site_replicate, -species_site_replicate, -species, -species_replicate, -micro) %>%
+  left_join(metadata, by = "number")
+
+anarchi <- anarchi %>%
+  select(-num)
+anarchi <- anarchi %>%
+  left_join(metadata, by = "number")
+anarchi <- anarchi %>%
+  select(number, site, site_type, site_replicate, species_site_replicate, species, species_replicate, micro, everything())
+#####
+#write.csv(anarchi, "anat_archi_per_year.csv")
+```
+### Creating dataset for each species
+```{r}
+anarchi <- read.csv(file = "anarchi_5.csv", header = T, stringsAsFactors = T)
+anarchiUseful <- anarchi %>%
+  select(-X, -aire_conic, -tig_ratio, -rac_ratio, -surface, -inflo, -image_surface_µm2_Tige, -image_surface_rectified_µm2.x_Tige, -image_surface_rectified_mm2_Tige, -vessel_density_per_m2_Tige, -dh_m_Tige, -image_surface_µm2_Racine, -image_surface_rectified_µm2.x_Racine, -vessel_density_per_m2_Racine, -dh_m_Racine)
+#####
+write.csv(anarchiUseful, "anarchi_6.csv")
+
+anarchi <- read.csv(file = "anarchi_6.csv", header = T, stringsAsFactors = T) %>%
+  select(-X)
+
+anarchi_Ho <- anarchi %>%
+  filter(species == "Ho")
+anarchi_Fe <- anarchi %>%
+  filter(species == "Fe")
+anarchi_Ft <- anarchi %>%
+  filter(species == "Ft")
+```
+
+
+# Data exploration
+## Correlations overview
+### Fumana ericoides
+```{r}
+pairs.panels(anarchi_Fe[,c("Kth_Tige", "vessel_density_per_mm2_Tige", "dh_Tige", "site_type",
+                        "diam_tig_princip_mm", "diam_rac_pivot_mm",
+                        "diam_rac_lat_mm", "diam_tig_lat_mm",
+                        "empreinte_photo_mm", "y_photo_mm")],
+             method = "spearman", # correlation method
+             hist.col = "lightgreen",
+             density = TRUE,  # show density plots
+             ellipses = FALSE # show correlation ellipses
+)
+```
+
+### Fumana thymifolia
+```{r}
+pairs.panels(anarchi_Ft[,c("Kth_Tige", "vessel_density_per_mm2_Tige", "dh_Tige", "site_type",
+                        "diam_tig_princip_mm", "diam_rac_pivot_mm",
+                        "diam_rac_lat_mm", "diam_tig_lat_mm",
+                        "empreinte_photo_mm", "y_photo_mm")],
+             method = "spearman", # correlation method
+             hist.col = "#00AFBB",
+             density = TRUE,  # show density plots
+             ellipses = FALSE # show correlation ellipses
+)
+```
+
+### Helianthemum oelandicum
+```{r}
+pairs.panels(anarchi_Ho[,c("Kth_Tige", "vessel_density_per_mm2_Tige", "dh_Tige",
+                        "diam_tig_princip_mm", "diam_rac_pivot_mm",
+                        "diam_rac_lat_mm", "diam_tig_lat_mm",
+                        "empreinte_photo_mm", "y_photo_mm")],
+             method = "spearman", # correlation method
+             hist.col = "orange",
+             density = TRUE,  # show density plots
+             ellipses = FALSE # show correlation ellipses
+)
+```
+
+## Architecture
+### Fumana ericoides
+#### Site models
+##### Diamètre tige principale
+
+```{r}
+mod_fe_1 <- lm(diam_tig_princip_mm ~ site_type, data = anarchi_Fe)
+mod_fe_1_aov <- aov(diam_tig_princip_mm ~ site_type, data = anarchi_Fe)
+
+anova(mod_fe_1)
+plot(mod_fe_1)
+
+summary(mod_fe_1)
+boxplot(diam_tig_princip_mm ~ site_type, data = anarchi_Fe)
+
+
+tuk_fe_1 <- glht(mod_fe_1_aov, linfct = mcp(site_type = "Tukey"))
+# test de Tukey:
+summary(tuk_fe_1) 
+
+```
+
+##### Conicité
+
+```{r}
+#######
+mod_fe_2 <- lm(conicite_mm ~ site_type, data = anarchi_Fe)
+mod_fe_2_aov <- aov(conicite_mm ~ site_type, data = anarchi_Fe)
+
+anova(mod_fe_2)
+plot(mod_fe_2)
+
+mod_fe_2 <- lm(conicite_mm ~ site_type, data = anarchi_Fe)
+mod_fe_2_aov <- aov(conicite_mm ~ site_type, data = anarchi_Fe)
+
+anova(mod_fe_2)
+plot(mod_fe_2)
+
+summary(mod_fe_2)
+boxplot(conicite_mm ~ site_type, data = anarchi_Fe)
+
+
+tuk_fe_2 <- glht(mod_fe_2_aov, linfct = mcp(site_type = "Tukey"))
+# test de Tukey:
+summary(tuk_fe_2) 
+
+tuk.cld_ft_2 <- cld(tuk_fe_2, decreasing = TRUE)   
+tuk.cld_ft_2 $mcletters$Letters
+```
+
+##### Profondeur du pivot
+
+```{r}
+#######
+mod_fe_3 <- lm(prof_pivot_mm ~ site_type, data = anarchi_Fe)
+mod_fe_3_aov <- aov(prof_pivot_mm ~ site_type, data = anarchi_Fe)
+
+anova(mod_fe_3)
+plot(mod_fe_3)
+
+summary(mod_fe_3)
+boxplot(prof_pivot_mm ~ site_type, data = anarchi_Fe)
+
+
+tuk_fe_3 <- glht(mod_fe_3_aov, linfct = mcp(site_type = "Tukey"))
+# test de Tukey:
+summary(tuk_fe_3) 
+
+tuk.cld_fe_3 <- cld(tuk_fe_1, decreasing = TRUE)   
+tuk.cld_fe_3 $mcletters$Letters
+```
+
+
+
+### Fumana thymifolia
+#### Site models
+##### Diamètre tige principale
+
+```{r}
+mod_ft_1 <- lm(diam_tig_princip_mm ~ site_type, data = anarchi_Ft)
+mod_ft_1_aov <- aov(diam_tig_princip_mm ~ site_type, data = anarchi_Ft)
+
+anova(mod_ft_1)
+plot(mod_ft_1)
+
+summary(mod_ft_1)
+boxplot(diam_tig_princip_mm ~ site_type, data = anarchi_Ft)
+
+
+tuk_ft_1 <- glht(mod_ft_1_aov, linfct = mcp(site_type = "Tukey"))
+# test de Tukey:
+summary(tuk_ft_1) 
+
+tuk.cld_ft_1 <- cld(tuk_ft_1, decreasing = TRUE)   
+tuk.cld_ft_1 $mcletters$Letters
+```
+
+##### Conicité
+
+```{r}
+mod_ft_2 <- lm(conicite_mm ~ site_type, data = anarchi_Ft)
+mod_ft_2_aov <- aov(conicite_mm ~ site_type, data = anarchi_Ft)
+
+anova(mod_ft_2)
+plot(mod_ft_2)
+
+summary(mod_ft_2)
+boxplot(conicite_mm ~ site_type, data = anarchi_Ft)
+
+
+tuk_ft_2 <- glht(mod_ft_2_aov, linfct = mcp(site_type = "Tukey"))
+# test de Tukey:
+summary(tuk_ft_2) 
+
+tuk.cld_ft_2 <- cld(tuk_ft_2, decreasing = TRUE)   
+tuk.cld_ft_2 $mcletters$Letters
+```
+
+##### Profondeur du pivot
+
+```{r}
+mod_ft_3 <- lm(prof_pivot_mm ~ site_type, data = anarchi_Ft)
+mod_ft_3_aov <- aov(prof_pivot_mm ~ site_type, data = anarchi_Ft)
+
+anova(mod_ft_3)
+plot(mod_ft_3)
+
+summary(mod_ft_3)
+boxplot(prof_pivot_mm ~ site_type, data = anarchi_Ft)
+
+
+tuk_ft_3 <- glht(mod_ft_3_aov, linfct = mcp(site_type = "Tukey"))
+# test de Tukey:
+summary(tuk_ft_3) 
+
+tuk.cld_ft_3 <- cld(tuk_ft_3, decreasing = TRUE)   
+tuk.cld_ft_3 $mcletters$Letters
+```
+
+### Helianthemum oelandicum
+#### Site models
+No site models: Helianthemum was only sampled in T
+
+
+## Anatomy
+### Fumana ericoides
+#### Site models
+##### Vessel density - Stems
+```{r}
+mod_fe_an_1 <- lm(vessel_density_per_mm2_Tige ~ site_type, data = anarchi_Fe)
+mod_fe_an_1_aov <- aov(vessel_density_per_mm2_Tige ~ site_type, data = anarchi_Fe)
+
+anova(mod_fe_an_1)
+plot(mod_fe_an_1)
+
+summary(mod_fe_an_1)
+boxplot(vessel_density_per_mm2_Tige ~ site_type, data = anarchi_Fe)
+
+
+tuk_fe_an_1 <- glht(mod_fe_an_1_aov, linfct = mcp(site_type = "Tukey"))
+# test de Tukey:
+summary(tuk_fe_an_1) 
+
+tuk.cld_fe_an_1 <- cld(tuk_fe_an_1, decreasing = TRUE)   
+tuk.cld_fe_an_1 $mcletters$Letters
+```
+##### Mean vessel size - Stems
+```{r}
+mod_fe_an_2 <- lm(mean_vessel_size_µm2_Tige ~ site_type, data = anarchi_Fe)
+mod_fe_an_2_aov <- aov(mean_vessel_size_µm2_Tige ~ site_type, data = anarchi_Fe)
+
+anova(mod_fe_an_2)
+plot(mod_fe_an_2)
+
+summary(mod_fe_an_2)
+boxplot(mean_vessel_size_µm2_Tige ~ site_type, data = anarchi_Fe)
+
+
+tuk_fe_an_2 <- glht(mod_fe_an_2_aov, linfct = mcp(site_type = "Tukey"))
+# test de Tukey:
+summary(tuk_fe_an_2) 
+
+tuk.cld_fe_an_2 <- cld(tuk_fe_an_2, decreasing = TRUE)   
+tuk.cld_fe_an_2 $mcletters$Letters
+```
+##### Theoretical conductivity - Stems
+```{r}
+mod_fe_an_3 <- lm(Kth_Tige ~ site_type, data = anarchi_Fe)
+mod_fe_an_3_aov <- aov(Kth_Tige ~ site_type, data = anarchi_Fe)
+
+anova(mod_fe_an_3)
+plot(mod_fe_an_3)
+
+summary(mod_fe_an_3)
+boxplot(Kth_Tige ~ site_type, data = anarchi_Fe)
+
+
+tuk_fe_an_3 <- glht(mod_fe_an_3_aov, linfct = mcp(site_type = "Tukey"))
+# test de Tukey:
+summary(tuk_fe_an_3) 
+
+tuk.cld_fe_an_3 <- cld(tuk_fe_an_3, decreasing = TRUE)   
+tuk.cld_fe_an_3 $mcletters$Letters
+```
+
+### Fumana thymifolia
+#### Site models
+##### Vessel density - Stems
+```{r}
+mod_ft_an_1 <- lm(vessel_density_per_mm2_Tige ~ site_type, data = anarchi_Ft)
+mod_ft_an_1_aov <- aov(vessel_density_per_mm2_Tige ~ site_type, data = anarchi_Ft)
+
+anova(mod_ft_an_1)
+plot(mod_ft_an_1)
+
+summary(mod_ft_an_1)
+boxplot(vessel_density_per_mm2_Tige ~ site_type, data = anarchi_Ft)
+
+
+tuk_ft_an_1 <- glht(mod_ft_an_1_aov, linfct = mcp(site_type = "Tukey"))
+# test de Tukey:
+summary(tuk_ft_an_1) 
+
+tuk.cld_ft_an_1 <- cld(tuk_ft_an_1, decreasing = TRUE)   
+tuk.cld_ft_an_1 $mcletters$Letters
+```
+##### Mean vessel size - Stems
+```{r}
+mod_ft_an_2 <- lm(mean_vessel_size_µm2_Tige ~ site_type, data = anarchi_Ft)
+mod_ft_an_2_aov <- aov(mean_vessel_size_µm2_Tige ~ site_type, data = anarchi_Ft)
+
+anova(mod_ft_an_2)
+plot(mod_ft_an_2)
+
+summary(mod_ft_an_2)
+boxplot(mean_vessel_size_µm2_Tige ~ site_type, data = anarchi_Ft)
+
+
+tuk_ft_an_2 <- glht(mod_ft_an_2_aov, linfct = mcp(site_type = "Tukey"))
+# test de Tukey:
+summary(tuk_ft_an_2) 
+
+tuk.cld_ft_an_2 <- cld(tuk_ft_an_2, decreasing = TRUE)   
+tuk.cld_ft_an_2 $mcletters$Letters
+```
+##### Theoretical conductivity - Stems
+```{r}
+mod_ft_an_3 <- lm(Kth_Tige ~ site_type, data = anarchi_Ft)
+mod_ft_an_3_aov <- aov(Kth_Tige ~ site_type, data = anarchi_Ft)
+
+anova(mod_ft_an_3)
+plot(mod_ft_an_3)
+
+summary(mod_ft_an_3)
+boxplot(Kth_Tige ~ site_type, data = anarchi_Ft)
+
+
+tuk_ft_an_3 <- glht(mod_ft_an_3_aov, linfct = mcp(site_type = "Tukey"))
+# test de Tukey:
+summary(tuk_ft_an_3) 
+
+tuk.cld_ft_an_3 <- cld(tuk_ft_an_3, decreasing = TRUE)   
+tuk.cld_ft_an_3 $mcletters$Letters
+```
+
+### Helianthemum oelandicum
+No site models: Helianthemum was only sampled in T
+
+## Anatomy and architecture: PCAs
+### All species
+```{r}
+anarchi_PCA <- anarchi %>%
+  select(site, site_type, species, conicite_mm, empreinte_photo_mm, y_photo_mm, prof_pivot_mm,
+         mean_vessel_size_µm2_Racine, vessel_density_per_mm2_Racine, Kth_Racine)
+
+
+anarchi_PCA_imputed <- imputePCA(anarchi_PCA[,4:10])$completeObs
+
+
+pca <- PCA(anarchi_PCA_imputed, graph = FALSE)
+
+fviz_eig(pca, addlabels = TRUE,)
+
+fviz_pca_var(pca, col.var = "cos2",
+             gradient.cols = c("blue", "purple", "red"),
+             repel = TRUE) 
+
+fviz_pca_ind(pca, 
+             habillage = anarchi_PCA$site_type,
+             addEllipses = TRUE,
+             ellipse.type = "confidence",
+             palette = "jco") +
+  ggtitle("All individuals - PCA")
+```
+
+### Fumana ericifolia
+```{r}
+anarchi_Fe_PCA <- anarchi_Fe %>%
+  select(site, site_type, species, conicite_mm, empreinte_photo_mm, y_photo_mm, prof_pivot_mm,
+         mean_vessel_size_µm2_Racine, vessel_density_per_mm2_Racine, Kth_Racine)
+
+
+anarchi_Fe_PCA_imputed <- imputePCA(anarchi_Fe_PCA[,4:10])$completeObs
+
+
+pca_Fe <- PCA(anarchi_Fe_PCA_imputed, graph = FALSE)
+
+fviz_eig(pca_Fe, addlabels = TRUE,)
+
+fviz_pca_var(pca_Fe, col.var = "cos2",
+             gradient.cols = c("blue", "purple", "red"),
+             repel = TRUE) 
+
+fviz_pca_ind(pca_Fe, 
+             habillage = anarchi_Fe_PCA$site_type,
+             addEllipses = TRUE,
+             ellipse.type = "confidence",
+             palette = "jco") +
+  ggtitle("Fumana ericifolia - PCA")
+
+
+```
+
+### Fumana thymifolia
+```{r}
+anarchi_Ft_PCA <- anarchi_Ft %>%
+  select(site, site_type, species, conicite_mm, empreinte_photo_mm, y_photo_mm, prof_pivot_mm,
+         mean_vessel_size_µm2_Racine, vessel_density_per_mm2_Racine, Kth_Racine)
+
+
+anarchi_Ft_PCA_imputed <- imputePCA(anarchi_Ft_PCA[,4:10])$completeObs
+
+
+pca_Ft <- PCA(anarchi_Ft_PCA_imputed, graph = FALSE)
+
+fviz_eig(pca_Ft, addlabels = TRUE,)
+
+fviz_pca_var(pca_Ft, col.var = "cos2",
+             gradient.cols = c("blue", "purple", "red"),
+             repel = TRUE) 
+
+fviz_pca_ind(pca_Ft, 
+             habillage = anarchi_Ft_PCA$site_type,
+             addEllipses = TRUE,
+             ellipse.type = "confidence",
+             palette = "jco") +
+  ggtitle("Fumana thymifolia - PCA")
+
+
+```
+
+
+
