@@ -40,7 +40,7 @@ Created from anat_archi_summary_v2.Rmd
 ```{r}
 #####Getting image dimensions####
 # list JPG files in a directory
-square_files <- list.files(path = "square/square-per_year/b&w-all_done/pictures", pattern = "\\.jpg$", full.names = TRUE)
+square_files <- list.files(path = "square/square-per_year/b&w-all_done/input", pattern = "\\.jpg$", full.names = TRUE)
 
 
 get_image_dimensions <- function(image_path) {
@@ -112,7 +112,9 @@ image_dimensions_df$width_µm <- image_dimensions_df$width_px / 1.9111
 image_dimensions_df$height_µm <- image_dimensions_df$height_px / 1.9111
 
 image_dimensions_df$image_surface_µm2 <- image_dimensions_df$width_µm * image_dimensions_df$height_µm
+```
 
+```{r}
 #####Final dataset####
 anat <- data.frame(
   file = image_dimensions_df$file,
@@ -170,7 +172,7 @@ anat <- anat %>%
 
 
 ### Calculating vessel conductivity, clusters, size, diameter...
-
+#### For each year
 ```{r}
 vessel <- read.csv(file = "square/square-per_year/b&w-all_done/data/vessels-per_year.csv", header = T)
 vessel$file <- vessel$Label
@@ -272,6 +274,7 @@ vessel_1200 <- vessel %>%
   filter(Area <= 1200) %>%
   mutate(diameter = 2*sqrt(Area/pi),
          d4 = diameter^4)
+
 #Cluster
 # vessel_summary_pre <- vessel_1200 %>%
 #   group_by(id_amap) %>%
@@ -289,6 +292,7 @@ vessel_summary_pre <- vessel_1200 %>%
             dh = (sum(d4)/n())^0.25,
             count_vessel = n()
             ) 
+
 
 # vessel_summary <- vessel_summary_pre2 %>%
 #   left_join(vessel_summary_pre, by = "id_amap") %>%
@@ -325,7 +329,66 @@ summary(vessel_summary)
 # write.csv(vessel_summary, file = "vessel_summary_6.csv")
 # write.csv(anat, file = "anat_10.csv")
 ```
+#### Grouped for all years
+```{r}
+vessel_summary_all_rings <- vessel_1200 %>%
+  group_by(id_amap) %>%
+  summarize(mean_vessel_size_all_µm2 = mean(Area),
+            mean_vessel_perim__all_µm = mean(Perim.),
+            sum_vessel_area_all_µm2 = sum(Area),
+            dh_all = (sum(d4)/n())^0.25,
+            count_vessel_all = n()
+            ) 
 
+vessel_extreme_sum_all <- vessel_extreme_sum %>%
+  group_by(id_amap) %>%
+  summarize(image_surface_rectified_all_µm2 = sum(image_surface_rectified_µm2))
+
+
+vessel_summary_all_rings <- vessel_summary_all_rings %>%
+  left_join(vessel_extreme_sum_all, by = "id_amap")
+
+
+vessel_summary_all_rings$image_surface_rectified_all_mm2 <- vessel_summary_all_rings$image_surface_rectified_all_µm2 / 1000000
+
+vessel_summary_all_rings$vessel_density_all_per_mm2 <- vessel_summary_all_rings$count_vessel_all / vessel_summary_all_rings$image_surface_rectified_all_mm2
+vessel_summary_all_rings$vessel_density_all_per_m2 <- vessel_summary_all_rings$vessel_density_all_per_mm2 * 10^6
+vessel_summary_all_rings$dh_all_m <- vessel_summary_all_rings$dh_all * 10^-6
+vessel_summary_all_rings$vessel_area_all <- vessel_summary_all_rings$sum_vessel_area_all_µm2 / vessel_summary_all_rings$image_surface_rectified_all_µm2
+
+
+#Getting Kth
+
+water_density <- 998.2
+water_viscosity <- 1.002*10^-9
+hagen_poiseuille <- (pi * water_density) / (128 * water_viscosity)
+
+vessel_summary_all_rings$Kth_all <- hagen_poiseuille * vessel_summary_all_rings$vessel_density_all_per_m2 * vessel_summary_all_rings$dh_all_m^4
+
+vessel_summary_all_rings <- vessel_summary_all_rings %>%
+  select(id_amap, mean_vessel_size_all_µm2, vessel_density_all_per_mm2, vessel_area_all, Kth_all)
+
+id_amap_number <- anat %>%
+  select(id_amap, number, organ) %>%
+  distinct(id_amap, number, organ)
+
+id_amap_number$id_amap <- as.character(id_amap_number$id_amap)
+vessel_summary_all_rings$id_amap <- as.character(vessel_summary_all_rings$id_amap)
+
+vessel_summary_all_rings <- vessel_summary_all_rings %>%
+  left_join(id_amap_number, by = "id_amap") %>%
+  select(-id_amap)
+
+vessel_summary_all_rings_complete <- vessel_summary_all_rings %>%
+  complete(number, organ)
+
+vessel_summary_all_rings_wide <- vessel_summary_all_rings_complete %>%
+  pivot_wider(names_from = "organ",
+              values_from = c("mean_vessel_size_all_µm2", "vessel_density_all_per_mm2", "vessel_area_all", "Kth_all"))
+
+plot(vessel_summary_all_rings_wide$vessel_density_all_per_mm2_T, vessel_summary_all_rings_wide$Kth_all_T)
+
+```
 ### Making a wide dataset with organ / year
 
 ```{r}
@@ -352,17 +415,48 @@ anat <- anat %>%
 
 
 anat_complete <- anat %>%
-  dplyr::select(-site, -site_type, -site_replicate, -species_site_replicate, -species, -species_replicate, -micro, -id_amap, -file, -id_complete) %>%
-  complete(number, organ, year) %>%
-  select(number, organ, year, c("ring_length_µm", "mean_vessel_size_µm2", "sum_vessel_area_µm2", "vessel_density_per_mm2", "vessel_area", "Kth"))
+  dplyr::select(-site, -site_type, -site_replicate, -species_site_replicate, -species, -species_replicate, -micro, -id_amap, -file, -id_complete)
 
+anat_complete <- anat_complete %>%
+  complete(number, organ, year) %>%
+  select(number, organ, year, c("ring_length_µm", "mean_vessel_size_µm2", "vessel_density_per_mm2", "vessel_area", "Kth"))
+
+#anat_complete$number <- sprintf("%02d", as.integer(anat_complete$number))
+metadata$number <- sprintf("%02d", as.integer(metadata$number))
+
+anat_complete$number <- as.character(anat_complete$number)
+metadata$number <- as.character(metadata$number)
+one_ninety$number <- sprintf("%02d", as.integer(one_ninety$number))
+one_ninety$number <- as.character(one_ninety$number)
+
+anat_final <- anat_complete %>%
+  full_join(one_ninety, by = "number")
+
+anat_final <- anat_final %>%
+  mutate(
+    organ = ifelse(is.na(organ), sample(organ[!is.na(organ)], size = n(), replace = TRUE), organ),
+    year = ifelse(is.na(year), sample(year[!is.na(year)], size = n(), replace = TRUE), year)
+  )
+anat_final <- anat_final %>%
+  complete(number, organ, year)
+anat_final$number <- as.character(anat_final$number)
+
+anat_final <- anat_final %>%
+  full_join(metadata, by = "number")
+
+anat_final <- anat_final %>%
+  select(number, site, site_type, site_replicate, species_site_replicate, species, species_replicate, micro, organ, year, everything())
+anat_final$site <- toupper(anat_final$site)
+
+anat_complete <- anat_final %>%
+  select(-site, -site_type, -site_replicate, -species_site_replicate, -species, -species_replicate, -micro)
+
+
+#write.csv(anat_final, "anat_long.csv")
 
 anat_wide <- anat_complete %>%
   pivot_wider(names_from = c(organ, year),
-              values_from = c("ring_length_µm", "mean_vessel_size_µm2", "sum_vessel_area_µm2", "vessel_density_per_mm2", "vessel_area", "Kth"))
-
-
-
+              values_from = c("ring_length_µm", "mean_vessel_size_µm2", "vessel_density_per_mm2", "vessel_area", "Kth"))
 
 #####Creating stem and root datasets####
 # numerical_cols <- c("ring_length_µm", "mean_vessel_size_µm2", "std_dev_vessel_size_µm2", "mean_vessel_perim_µm", "std_dev_perim_µm", "sum_vessel_area_µm2", "dh", "count_vessel", "image_surface_rectified_mm2", "vessel_density_per_mm2", "vessel_density_per_m2", "dh_m", "vessel_area", "Kth")
@@ -377,6 +471,7 @@ anat_wide <- anat_complete %>%
 #   dplyr::select(all_of(numerical_cols), number, year) %>%
 #   rename_with(~ paste0(., "_Tige"), all_of(numerical_cols))
 # #####Binding root and stem datasets and selecting variables####
+
 # anat_Tige_Racine <- anat_Tige %>%
 #   full_join(anat_Racine, by = c("number", "year"))
 # #keeping metadata aside
@@ -418,18 +513,25 @@ anarchi <- archi %>%
   dplyr::select(-X, -code, -species, -site_type, -site_replicate, -site, -micro, -num) %>%
   full_join(anat_wide, by = "number")
 
-anarchi <- anarchi %>%
-  select(-site,-site_type, -site_replicate, -species_site_replicate, -species, -species_replicate, -micro) %>%
-  left_join(metadata, by = "number")
+vessel_summary_all_rings_wide$number <- as.numeric(vessel_summary_all_rings_wide$number)
+vessel_summary_all_rings_wide$number <- as.character(vessel_summary_all_rings_wide$number)
 
 anarchi <- anarchi %>%
-  select(-num)
+  full_join(vessel_summary_all_rings_wide, by = "number")
+
+str(metadata$number)
+str(anarchi$number)
+
 anarchi <- anarchi %>%
   left_join(metadata, by = "number")
+
+anarchi$site <- toupper(anarchi$site)
+anarchi$number <- as.numeric(anarchi$number)
 anarchi <- anarchi %>%
-  select(number, site, site_type, site_replicate, species_site_replicate, species, species_replicate, micro, everything())
+  select(number, site, site_type, site_replicate, species_site_replicate, species, species_replicate, micro, everything()) %>%
+  arrange(number)
 #####
-#write.csv(anarchi, "anat_archi_per_year.csv")
+write.csv(anarchi, "anat_archi.csv")
 ```
 ### Creating dataset for each species
 ```{r}
@@ -437,7 +539,7 @@ anarchi <- read.csv(file = "anarchi_5.csv", header = T, stringsAsFactors = T)
 anarchiUseful <- anarchi %>%
   select(-X, -aire_conic, -tig_ratio, -rac_ratio, -surface, -inflo, -image_surface_µm2_Tige, -image_surface_rectified_µm2.x_Tige, -image_surface_rectified_mm2_Tige, -vessel_density_per_m2_Tige, -dh_m_Tige, -image_surface_µm2_Racine, -image_surface_rectified_µm2.x_Racine, -vessel_density_per_m2_Racine, -dh_m_Racine)
 #####
-write.csv(anarchiUseful, "anarchi_6.csv")
+#write.csv(anarchiUseful, "anarchi_6.csv")
 
 anarchi <- read.csv(file = "anarchi_6.csv", header = T, stringsAsFactors = T) %>%
   select(-X)
