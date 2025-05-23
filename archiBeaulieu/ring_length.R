@@ -15,7 +15,7 @@ anat_sp <- map(species, ~filter(anat_long, species == .x)) %>%
 
 anat_sp_organ <- imap(anat_sp, function(df, name) {
   split(df, df$organ) %>% 
-    set_names(~ paste0(name, "_", .x))  # .x here are the subgroup levels
+    set_names(~ paste0(name, "_", .x))  
 }) %>%
   flatten()
 
@@ -25,11 +25,11 @@ anat_sp_organ <- imap(anat_sp, function(df, name) {
 
 plot_ring_length_by_year <- function(data, year_col = "year", value_col = "ring_length_µm",
                                      facet_col = "site_type") {
-  # Extract dataset name (e.g., "Fe_T")
+
   dataset_full <- deparse(substitute(data))
   dataset_id <- tail(strsplit(dataset_full, "\\$|\\[\\[|\\]\\]")[[1]], 1)
   
-  # Species and organ lookup
+
   species_lookup <- c(
     Fe = "Fumana ericifolia",
     Ft = "Fumana thymifolia",
@@ -41,7 +41,7 @@ plot_ring_length_by_year <- function(data, year_col = "year", value_col = "ring_
     R = "Root"
   )
   
-  # Extract species and organ from dataset name
+  
   parts <- unlist(strsplit(dataset_id, "_"))
   species_code <- parts[1]
   organ_code <- parts[2]
@@ -80,11 +80,11 @@ plot_ring_length_by_year(anat_sp_organ$Ho_R)
 
 plot_vessel_size_by_year <- function(data, year_col = "year", value_col = "mean_vessel_size_µm2",
                                      facet_col = "site_type") {
-  # Extract dataset name (e.g., "Fe_T")
+  
   dataset_full <- deparse(substitute(data))
   dataset_id <- tail(strsplit(dataset_full, "\\$|\\[\\[|\\]\\]")[[1]], 1)
   
-  # Species and organ lookup
+  
   species_lookup <- c(
     Fe = "Fumana ericifolia",
     Ft = "Fumana thymifolia",
@@ -96,7 +96,7 @@ plot_vessel_size_by_year <- function(data, year_col = "year", value_col = "mean_
     R = "Root"
   )
   
-  # Extract species and organ from dataset name
+  
   parts <- unlist(strsplit(dataset_id, "_"))
   species_code <- parts[1]
   organ_code <- parts[2]
@@ -106,11 +106,11 @@ plot_vessel_size_by_year <- function(data, year_col = "year", value_col = "mean_
   
   title_text <- paste(species_name, "–", organ_name, ": Vessel size per year according to site type")
   
-  # Ensure year is a factor with levels in order
+  
   data <- data %>%
     mutate(!!year_col := factor(.data[[year_col]], levels = c(2021, 2022, 2023, 2024)))
   
-  # Generate plot
+  
   ggplot(data, aes(x = .data[[year_col]], y = .data[[value_col]])) +
     geom_boxplot() +
     facet_wrap(as.formula(paste("~", facet_col)), scales = "free_x", nrow = 1) +
@@ -136,11 +136,11 @@ plot_vessel_size_by_year(anat_sp_organ$Ho_R)
 #####Vessel density####
 plot_vessel_density_by_year <- function(data, year_col = "year", value_col = "vessel_density_per_mm2",
                                      facet_col = "site_type") {
-  # Extract dataset name (e.g., "Fe_T")
+  
   dataset_full <- deparse(substitute(data))
   dataset_id <- tail(strsplit(dataset_full, "\\$|\\[\\[|\\]\\]")[[1]], 1)
   
-  # Species and organ lookup
+  
   species_lookup <- c(
     Fe = "Fumana ericifolia",
     Ft = "Fumana thymifolia",
@@ -152,7 +152,7 @@ plot_vessel_density_by_year <- function(data, year_col = "year", value_col = "ve
     R = "Root"
   )
   
-  # Extract species and organ from dataset name
+  
   parts <- unlist(strsplit(dataset_id, "_"))
   species_code <- parts[1]
   organ_code <- parts[2]
@@ -162,7 +162,7 @@ plot_vessel_density_by_year <- function(data, year_col = "year", value_col = "ve
   
   title_text <- paste(species_name, "–", organ_name, ": Vessel density per year according to site type")
   
-  # Ensure year is a factor with levels in order
+  
   data <- data %>%
     mutate(!!year_col := factor(.data[[year_col]], levels = c(2021, 2022, 2023, 2024)))
   
@@ -190,69 +190,13 @@ plot_vessel_density_by_year(anat_sp_organ$Ho_R)
 
 
 #####Conductivity####
-plot_vessel_size_by_year <- function(data, year_col = "year", value_col = "mean_vessel_size_µm2",
-                                     facet_col = "site_type") {
-  # Extract dataset name (e.g., "Fe_T")
-  dataset_full <- deparse(substitute(data))
-  dataset_id <- tail(strsplit(dataset_full, "\\$|\\[\\[|\\]\\]")[[1]], 1)
-  
-  # Species and organ lookup
-  species_lookup <- c(
-    Fe = "Fumana ericifolia",
-    Ft = "Fumana thymifolia",
-    Ho = "Helianthemum oelandicum"
-  )
-  
-  organ_lookup <- c(
-    T = "Stem",
-    R = "Root"
-  )
-  
-  # Extract species and organ from dataset name
-  parts <- unlist(strsplit(dataset_id, "_"))
-  species_code <- parts[1]
-  organ_code <- parts[2]
-  
-  species_name <- species_lookup[[species_code]]
-  organ_name <- organ_lookup[[organ_code]]
-  
-  title_text <- paste(species_name, "–", organ_name, ": Vessel size per year according to site type")
-  
-  # Ensure year is a factor with levels in order
-  data <- data %>%
-    mutate(!!year_col := factor(.data[[year_col]], levels = c(2021, 2022, 2023, 2024)))
-  
-  # Generate plot
-  ggplot(data, aes(x = .data[[year_col]], y = .data[[value_col]])) +
-    geom_boxplot() +
-    facet_wrap(as.formula(paste("~", facet_col)), scales = "free_x", nrow = 1) +
-    theme_bw() +
-    labs(
-      x = "Year",
-      y = "Vessel size (µm²)",
-      title = title_text
-    )
-}
-
-plot_vessel_size_by_year(anat_sp_organ$Fe_T)
-plot_vessel_size_by_year(anat_sp_organ$Fe_R)
-
-plot_vessel_size_by_year(anat_sp_organ$Ft_T)
-plot_vessel_size_by_year(anat_sp_organ$Ft_R)
-
-plot_vessel_size_by_year(anat_sp_organ$Ho_T)
-plot_vessel_size_by_year(anat_sp_organ$Ho_R)
-
-
-
-#####Vessel density####
 plot_conductivity_by_year <- function(data, year_col = "year", value_col = "Kth",
                                         facet_col = "site_type") {
-  # Extract dataset name (e.g., "Fe_T")
+  
   dataset_full <- deparse(substitute(data))
   dataset_id <- tail(strsplit(dataset_full, "\\$|\\[\\[|\\]\\]")[[1]], 1)
   
-  # Species and organ lookup
+  
   species_lookup <- c(
     Fe = "Fumana ericifolia",
     Ft = "Fumana thymifolia",
@@ -264,7 +208,7 @@ plot_conductivity_by_year <- function(data, year_col = "year", value_col = "Kth"
     R = "Root"
   )
   
-  # Extract species and organ from dataset name
+  
   parts <- unlist(strsplit(dataset_id, "_"))
   species_code <- parts[1]
   organ_code <- parts[2]
@@ -274,11 +218,11 @@ plot_conductivity_by_year <- function(data, year_col = "year", value_col = "Kth"
   
   title_text <- paste(species_name, "–", organ_name, ": Theoretical conductivity (Kth) per year according to site type")
   
-  # Ensure year is a factor with levels in order
+  
   data <- data %>%
     mutate(!!year_col := factor(.data[[year_col]], levels = c(2021, 2022, 2023, 2024)))
   
-  # Generate plot
+  
   ggplot(data, aes(x = .data[[year_col]], y = .data[[value_col]])) +
     geom_boxplot() +
     facet_wrap(as.formula(paste("~", facet_col)), scales = "free_x", nrow = 1) +
