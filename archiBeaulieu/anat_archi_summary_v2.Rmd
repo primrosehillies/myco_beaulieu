@@ -419,7 +419,7 @@ anat_complete <- anat %>%
 
 anat_complete <- anat_complete %>%
   complete(number, organ, year) %>%
-  select(number, organ, year, c("ring_length_µm", "mean_vessel_size_µm2", "vessel_density_per_mm2", "vessel_area", "Kth"))
+  select(number, organ, year, c("ring_length_µm", "mean_vessel_size_µm2", "vessel_density_per_mm2", "vessel_area", "Kth", "count_vessel"))
 
 #anat_complete$number <- sprintf("%02d", as.integer(anat_complete$number))
 metadata$number <- sprintf("%02d", as.integer(metadata$number))
